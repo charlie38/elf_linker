@@ -1,11 +1,11 @@
 #include <stdio.h>
 
-#include "usr/include/elf.h"
+#include "elf.h"
 
 
 Elf32_Ehdr read_header(FILE *f)
 {
-    Elf32_Ehdr elf = malloc(sizeof(Elf32_Ehdr)) ;
+    Elf32_Ehdr elf;
 
     fread(&elf.e_ident[EI_MAG0], 1, 1, f) ; 
     fread(&elf.e_ident[EI_MAG1], 1, 1, f) ; 
