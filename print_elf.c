@@ -1,8 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "/usr/include/elf.h"
+#include <elf.h>
 
 
 void print_header(Elf32_Ehdr elf)

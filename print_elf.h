@@ -1,7 +1,6 @@
-#include <elf.h>
 #ifndef __PRINT_ELF_H__
 
-#include "usr/include/elf.h"
+#include <elf.h>
 
 
 void print_elf(Elf32_Ehdr elf) ;

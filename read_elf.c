@@ -1,6 +1,5 @@
 #include <stdio.h>
-
-#include "usr/include/elf.h"
+#include <elf.h>
 
 
 Elf32_Ehdr read_header(FILE *f)
