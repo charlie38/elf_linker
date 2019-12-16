@@ -6,3 +6,6 @@ Pour soumettre des modifications au groupe : merci de commit sur la branche **pr
 
 ## NE PAS TOUCHER À LA BRANCHE MASTER!
 Elle sera utilisée pour le rendu final aux professeurs
+
+
+Modifier par Hugo
