@@ -83,7 +83,7 @@ void print_os_abi(Elf32_Ehdr elf)
 
 void print_abi_version(Elf32_Ehdr elf)
 {
-    printf("  ABI Version:                       %c",) ;
+    printf("  ABI Version:                       %c",e_ident[EI_ABIVERSION]) ;
 
     // TODO
 }
