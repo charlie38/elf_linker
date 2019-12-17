@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "elf.h"
 
@@ -45,8 +46,8 @@ void print_data(Elf32_Ehdr elf)
     {
         case ELFDATANONE : printf("Invalid data encoding\n"); break;
         case ELFDATA2LSB : printf("2's complement, little endian\n"); break;
-        case ELFDATANUM : printf("2's complement, big endian\n"); break;
-        default : break;
+        case ELFDATA2MSB : printf("2's complement, big endian\n"); break;
+        default: break;
     }
 }
 
@@ -61,7 +62,7 @@ void print_os_abi(Elf32_Ehdr elf)
 
     switch (elf.e_ident[EI_OSABI])
     {
-        case ELFOSABI_NONE : printf("UNIX System V ABI\n"); break;
+        case ELFOSABI_NONE : printf("UNIX System V\n"); break;
         case ELFOSABI_HPUX : printf("HP-UX\n"); break;
         case ELFOSABI_NETBSD : printf("NetBSD\n"); break;
         case ELFOSABI_GNU : printf("object uses GNU ELF extensions\n"); break;
@@ -80,11 +81,9 @@ void print_os_abi(Elf32_Ehdr elf)
     }
 }
 
-void print_abi_version(Elf32_Ehdr elf)
+void print_version_abi(Elf32_Ehdr elf)
 {
-    printf("  ABI Version:                       ") ;
-
-    // TODO
+    printf("  ABI Version:                       %d\n",elf.e_ident[EI_ABIVERSION]) ;
 }
 
 void print_type(Elf32_Ehdr elf)
@@ -117,7 +116,8 @@ void print_machine(Elf32_Ehdr elf)
         case EM_88K : printf("Motorola 88000\n") ; break ;  
         case EM_860 : printf("Intel 80860\n") ; break ;  
         case EM_MIPS : printf("MIPS RS3000 Big-Endian\n") ; break ;  
-        case EM_MIPS_RS3_LE : printf("MIPS RS4000 Big-Endian\n") ; break ;  // A modifier 
+        case EM_MIPS_RS3_LE : printf("MIPS RS4000 Big-Endian\n") ; break ;
+        case EM_ARM: printf("ARM\n"); break;
         //case RESERVED : printf("Reserved for future use\n") ;
     }
 }
@@ -125,17 +125,18 @@ void print_machine(Elf32_Ehdr elf)
 void print_version(Elf32_Ehdr elf)
 {
     printf("  Version:                           ") ;
-
-    switch (elf.e_version) 
+    printf("0x%x\n",elf.e_version);
+    /*switch (elf.e_version) 
     {
         case EV_NONE : printf("0 (invalid version)\n") ; break ;
-        case EV_CURRENT : printf("1 (current version)\n") ;
-    }
+        case EV_CURRENT : printf("1 (current version)\n") ; break;
+        case EV_NUM : printf("2"); break;
+    }*/
 }
 
 void print_entry(Elf32_Ehdr elf)
 {
-    printf("  Entry point access:                %x\n", elf.e_entry) ;
+    printf("  Entry point access:                0x%x\n", elf.e_entry) ;
 }
 
 void print_start_prog_headers(Elf32_Ehdr elf)
@@ -144,7 +145,7 @@ void print_start_prog_headers(Elf32_Ehdr elf)
 
     switch (elf.e_phoff)
     {
-        case 0 : printf("No program headers table\n") ; break ;
+        case 0 : printf("%d (bytes into file)\n", elf.e_phoff) ; break ;
         default : printf("%d (bytes into file)\n", elf.e_phoff) ;
     }
 }
@@ -156,7 +157,7 @@ void print_start_sect_headers(Elf32_Ehdr elf)
     switch (elf.e_shoff)
     {
         case 0 : printf("No section headers table\n") ; break ;
-        default : printf("%d (bytes into file)\n", elf.e_phoff) ;
+        default : printf("%u  (bytes into file)\n",elf.e_shoff) ;
     }
 }
 
@@ -203,7 +204,7 @@ void print_elf(Elf32_Ehdr elf)
     print_data(elf) ;
     print_version_magic(elf) ;
     print_os_abi(elf) ;
-    //print_version_abi(elf) ;
+    print_version_abi(elf) ;
     print_type(elf) ;
     print_machine(elf) ;
     print_version(elf) ;

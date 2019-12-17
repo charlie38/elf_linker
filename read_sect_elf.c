@@ -5,11 +5,11 @@
 #include "read_sect_elf.h"
 #include "read_elf.h"
 
-void read_section(FILE *f, Elf32_Shdr section_tab[],uint32_t offset,uint32_t size_h,uint32_t nb_sect){
+void read_section(FILE *f, Elf32_Shdr section_tab[],uint32_t offset,uint32_t nb_sect){
     
     int i = 0;
 
-    fseek(f,offset-size_h,SEEK_SET); //Placement de l'indicateur de position au niveau de l'entête de la table des sections
+    fseek(f,offset,SEEK_SET); //Placement de l'indicateur de position au niveau de l'entête de la table des sections
 
     for(i=0;i<nb_sect;i++){
         fread(&section_tab[i].sh_name,4,1,f);    //Lecture du name

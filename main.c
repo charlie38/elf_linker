@@ -23,15 +23,15 @@ int main(int argc,char *argv[]){
         return 4;
     }
 
-    Elf32_Ehdr elf;
+    Elf32_Ehdr head;
     Elf32_Shdr section_tab[30];
 
-    elf = read_header(f);
-    print_elf(elf);
+    head = read_header(f);
+    print_elf(head);
 
 
-    read_section(f,section_tab,elf.e_shoff,elf.e_ehsize,elf.e_shnum);
-    afficher_table_sections(section_tab,elf.e_shnum);
+    read_section(f,section_tab,head.e_shoff,head.e_shnum);
+    afficher_table_sections(section_tab,head.e_shnum);
 
     fclose(f);
     return 0;

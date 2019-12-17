@@ -11,7 +11,7 @@ void espaces(int n){
 void afficher_table_sections(Elf32_Shdr TS[], int taille, char strtab[]){
 	int i;
 	char mot[50];
-	printf("[Nr]            Type            Addr      Offs      Size    ES   Flg  Lk  Inf  Al\n");
+	printf("[Nr]            Name            Type            Addr      Offs      Size          ES       Flg        Lk       Inf        Al\n");
 	
 	for(i=0; i<taille; i++){
 		if(i<10) printf("[ %d]",i);
@@ -20,11 +20,11 @@ void afficher_table_sections(Elf32_Shdr TS[], int taille, char strtab[]){
     	
 		//printf("Nom : %s  | ", strtab[TS[i].sh_name]);
     	//mot=strtab[TS[i].sh_name];
-    	//espaces(20);
+    	espaces(16);
     	//printf("%s",mot);
     	
     	//TYPE:
-      strcpy(mot, "");
+      	mot[0] = '\0';
 
 	    switch(TS[i].sh_type){
 	      case SHT_NULL: strcpy(mot,"NULL");
@@ -63,28 +63,28 @@ void afficher_table_sections(Elf32_Shdr TS[], int taille, char strtab[]){
     
     	//SIZE
     
-    	espaces(4);    
-    	printf("%6.6x", TS[i].sh_size);
+    	espaces(2);    
+    	printf("%8.8x", TS[i].sh_size);
     
         //ENTSIZE
     
     	espaces(4);
-    	printf("%2.2x", TS[i].sh_entsize);
+    	printf("%8.8x", TS[i].sh_entsize);
     
     	
     
     //FLAG
     
     	
-		strcpy(mot,"");  
+		  strcpy(mot,"");  
 		  	    
 	    if( TS[i].sh_flags & SHF_WRITE ) strcat(mot,"W");
 	    if( TS[i].sh_flags & SHF_ALLOC ) strcat(mot,"A");
 	    if( TS[i].sh_flags & SHF_EXECINSTR ) strcat(mot,"I");
 	    //if( TS[i].sh_flags & SHF_MASKPROC ) mot=strcat(mot, "X");
 	    
-	    espaces(6-strlen(mot));
-    
+	    espaces(10-strlen(mot));
+      printf("%s",mot);
    		
     
 
@@ -92,17 +92,17 @@ void afficher_table_sections(Elf32_Shdr TS[], int taille, char strtab[]){
     
     	//LINK
     	espaces(2);
-    	printf("%2.2x", TS[i].sh_link);
+    	printf("%8.8x", TS[i].sh_link);
     
     	//INFO
     	
     	espaces(2);
-    	printf("%2.2x", TS[i].sh_info);
+    	printf("%8.8x", TS[i].sh_info);
     
     
     	//ADDRALIGN
     	espaces(2);
-    	printf("%2.2x", TS[i].sh_addralign);
+    	printf("%8.8x", TS[i].sh_addralign);
     
     	printf("\n");
 
