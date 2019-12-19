@@ -6,6 +6,8 @@
 #include "read_elf.h"
 #include "print_elf.h"
 #include "print_sht.h"
+#include "elf_linker-1.0/util.h"
+
 
 int main(int argc,char *argv[]){
 
@@ -31,7 +33,13 @@ int main(int argc,char *argv[]){
 
 
     read_section(f,section_tab,head.e_shoff,head.e_shnum);
-    afficher_table_sections(section_tab,head.e_shnum);
+
+    char strtab[section_tab[head.e_shstrndx].sh_size];
+
+    read_string_table(f,head,section_tab,strtab);
+    afficher_table_sections(section_tab,head.e_shnum,strtab);
+
+    afficher_section(f,section_tab,12,strtab);
 
     fclose(f);
     return 0;

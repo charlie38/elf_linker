@@ -6,6 +6,7 @@
 #include "read_elf.h"
 #include "elf_linker-1.0/util.h"
 
+
 void read_section(FILE *f, Elf32_Shdr section_tab[],uint32_t offset,uint32_t nb_sect){
     
     int i = 0;
@@ -47,3 +48,15 @@ void read_section(FILE *f, Elf32_Shdr section_tab[],uint32_t offset,uint32_t nb_
 
     return;
 }
+
+
+void read_string_table(FILE *f,Elf32_Ehdr head,Elf32_Shdr section_tab[],char strtab[]){
+    fseek(f,section_tab[head.e_shstrndx].sh_offset,SEEK_SET);
+    int i;
+    for(i=0;i<section_tab[head.e_shstrndx].sh_size;i++){
+        fread(&strtab[i],1,1,f);
+    }
+    printf("\n");
+    return;
+}
+

@@ -157,13 +157,13 @@ void print_start_sect_headers(Elf32_Ehdr elf)
     switch (elf.e_shoff)
     {
         case 0 : printf("No section headers table\n") ; break ;
-        default : printf("%u  (bytes into file)\n",elf.e_shoff) ;
+        default : printf("%d (bytes into file)\n",elf.e_shoff) ;
     }
 }
 
 void print_flags(Elf32_Ehdr elf)
 {
-    printf("  Flags:                             %x\n", elf.e_flags) ;
+    printf("  Flags:                             0x%x\n", elf.e_flags) ;
 }
 
 void print_header_size(Elf32_Ehdr elf)

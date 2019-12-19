@@ -8,20 +8,37 @@ void espaces(int n){
 	for(i=0;i<n;i++) printf(" ");
 }
 
-void afficher_table_sections(Elf32_Shdr TS[], int taille, char strtab[]){
+int afficher_name(char strtab[],int i){
+	int j = 0;
+	if(strtab[i] != '\0') printf(".");
+	while(strtab[i] != '\0'){
+		j++;
+		i++;
+		printf("%c",strtab[i]);
+	}
+	return j;
+}
+
+void afficher_table_sections(Elf32_Shdr TS[], int taille,char strtab[]){
 	int i;
+	int j;
+	int k;
 	char mot[50];
-	printf("[Nr]            Name            Type            Addr    Offs      Size  ES       Flg  Lk Inf  Al\n");
+	printf("[Nr]            Name                  Type            Addr    Offs      Size  ES       Flg  Lk Inf  Al\n");
 	
 	for(i=0; i<taille; i++){
 		if(i<10) printf("[ %d]",i);
 		else printf("[%d]",i);
-    	//NAME: 
-    	
-		//printf("Nom : %s  | ", strtab[TS[i].sh_name]);
-    	//mot=strtab[TS[i].sh_name];
-		espaces(16);
-    	//printf("%s",mot);
+
+
+		//NAME:
+
+		j = TS[i].sh_name;
+		espaces(3);
+		k = afficher_name(strtab,j);
+		k = 20-k;
+		//if(k==20) k = k-1;
+		espaces(k);
     	
     	//TYPE:
 		strcpy(mot, "");
@@ -118,4 +135,20 @@ void afficher_table_sections(Elf32_Shdr TS[], int taille, char strtab[]){
 	
 	
 	return;	
+}
+
+
+
+void afficher_section(FILE* f, Elf32_Shdr TS[], int s,char strtab[]){
+    int offset=TS[s].sh_offset;
+    int taille=TS[s].sh_size;
+	afficher_name(strtab,TS[s].sh_name);
+	printf("\n");
+    fseek(f,offset,SEEK_SET);
+    int i;
+    for(i=0; i<taille; i++){
+		if(i%4 == 0 && i!=0) printf("\n");
+        printf("%2.2x  ", fgetc(f));
+    }
+	printf("\n");
 }
