@@ -7,7 +7,7 @@
 
 void afficher_symb_tab(Elf32_Sym symtab[],int nb_symb,char strsymtab[]){
     int i;
-    printf("Num :        Value    Size      Type   Bind   Vis       Ndx     Name\n");
+    printf("Num :        Value    Size    Type     Bind    Vis       Ndx     Name\n");
     for(i=0;i<nb_symb;i++){
 
         //NUM
@@ -42,7 +42,6 @@ void afficher_symb_tab(Elf32_Sym symtab[],int nb_symb,char strsymtab[]){
             case STT_HIOS: printf("HIOS"); break;
             case STT_LOPROC: printf("LOPROC"); break;
             case STT_HIPROC: printf("HIPROC"); break;
-            default: printf("HEHEHEH"); break;
         }
 
 
@@ -50,13 +49,13 @@ void afficher_symb_tab(Elf32_Sym symtab[],int nb_symb,char strsymtab[]){
 
         espaces(5);
 
-        switch(ELF32_ST_BIND(symtab[i].st_other)){
-            case STB_LOCAL: printf("LOCAL"); break;
+        switch(ELF32_ST_BIND(symtab[i].st_info)){
+            case STB_LOCAL: printf("LOCAL "); break;
             case STB_GLOBAL: printf("GLOBAL"); break;
-            case STB_WEAK: printf("WEAK"); break;
-            case STB_NUM: printf("NUM"); break;
-            case STB_LOOS: printf("LOOS"); break;
-            case STB_HIOS: printf("HIOS"); break;
+            case STB_WEAK: printf("WEAK  "); break;
+            case STB_NUM: printf("NUM   "); break;
+            case STB_LOOS: printf("LOOS  "); break;
+            case STB_HIOS: printf("HIOS  "); break;
             case STB_LOPROC: printf("LOPROC"); break;
             case STB_HIPROC: printf("HIPROC"); break;
 
@@ -74,10 +73,10 @@ void afficher_symb_tab(Elf32_Sym symtab[],int nb_symb,char strsymtab[]){
 
         //NDX
         
-        if(symtab[i].st_shndx == STN_UNDEF) printf("UND\n");
+        if(symtab[i].st_shndx == STN_UNDEF) printf("UND");
         else printf("%d",symtab[i].st_shndx);
 
-        espaces(3);
+        espaces(6);
 
         //NAME
         
