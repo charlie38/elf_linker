@@ -59,11 +59,11 @@ int main(int argc,char *argv[]){
 
     //Initialisation des tables des noms des sections et des noms des symboles
     char strtab[section_tab[head.e_shstrndx].sh_size];
-    char strsymtab[section_tab[14].sh_size];
+    char strsymtab[section_tab[head.e_shstrndx+2].sh_size];
 
     //Lecture des tables de noms : sections , symboles
     read_string_table(f,head,section_tab,strtab,head.e_shstrndx);
-    read_string_table(f,head,section_tab,strsymtab,14);
+    read_string_table(f,head,section_tab,strsymtab,head.e_shstrndx+2);
 
     //Numéro de la section de la table des symboles
     index = index_symtab(section_tab);

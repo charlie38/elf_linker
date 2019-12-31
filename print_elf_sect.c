@@ -10,7 +10,7 @@ void afficher_sht(Elf32_Shdr section_tab[], int taille, char strtab[]){
 	int j;
 	int k;
 	char mot[50];
-	printf("[Nr]            Name                  Type            Addr    Offs      Size  ES       Flg  Lk Inf  Al\n");
+	printf("[Nr]            Name                  Type            Addr    Off      Size  ES       Flg  Lk Inf  Al\n");
 	
 	for(i=0; i<taille; i++){
 		if(i<10) printf("[ %d]",i);
@@ -34,12 +34,12 @@ void afficher_sht(Elf32_Shdr section_tab[], int taille, char strtab[]){
 			case SHT_PROGBITS: strcpy(mot,"PROGBITS"); break; 
 			case SHT_SYMTAB: strcpy(mot,"SYMTAB"); break; 
 			case SHT_STRTAB: strcpy(mot,"STRTAB"); break; 
-			case SHT_RELA: strcpy(mot,"RELA"); break;  
+			case SHT_RELA: strcpy(mot,"REL"); break;  
 			case SHT_HASH: strcpy(mot,"HASH"); break; 
 			case SHT_DYNAMIC: strcpy(mot,"DYNAMIC"); break; 
 			case SHT_NOTE: strcpy(mot,"NOTE"); break; 
-			case SHT_NOBITS: strcpy(mot,"NOBIT"); break; 
-			case SHT_REL: strcpy(mot,"RELA"); break; 
+			case SHT_NOBITS: strcpy(mot,"NOBITS"); break; 
+			case SHT_REL: strcpy(mot,"REL"); break; 
 			case SHT_SHLIB: strcpy(mot,"SHLIB"); break; 
 			case SHT_DYNSYM: strcpy(mot,"DYNSYM"); break; 
 			case SHT_LOPROC: strcpy(mot,"LOPROC"); break; 
@@ -70,7 +70,7 @@ void afficher_sht(Elf32_Shdr section_tab[], int taille, char strtab[]){
     	//SIZE
     
 		espaces(2);    
-		printf("%8.8x", section_tab[i].sh_size);
+		printf("%6.6x", section_tab[i].sh_size);
     
         //ENTSIZE
     

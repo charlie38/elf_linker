@@ -20,7 +20,7 @@ void print_magic(Elf32_Ehdr elf)
     
     for(i = 0 ; i < EI_NIDENT ; i++)
     {
-        printf("%x ", elf.e_ident[i]) ;
+        printf("%2.2x ", elf.e_ident[i]) ;
     }
     
     printf("\n") ;
@@ -62,7 +62,7 @@ void print_data(Elf32_Ehdr elf)
 
 void print_version_magic(Elf32_Ehdr elf)
 {
-    printf("  Version:                           %d\n", elf.e_ident[EI_VERSION]) ;
+    printf("  Version:                           %d (current)\n", elf.e_ident[EI_VERSION]) ;
 }
 
 
@@ -74,7 +74,7 @@ void print_os_abi(Elf32_Ehdr elf)
 
     switch (elf.e_ident[EI_OSABI])
     {
-        case ELFOSABI_NONE : printf("UNIX System V\n"); break;
+        case ELFOSABI_NONE : printf("UNIX - System V\n"); break;
         case ELFOSABI_HPUX : printf("HP-UX\n"); break;
         case ELFOSABI_NETBSD : printf("NetBSD\n"); break;
         case ELFOSABI_GNU : printf("object uses GNU ELF extensions\n"); break;
@@ -107,7 +107,7 @@ void print_type(Elf32_Ehdr elf)
     switch (elf.e_type) 
     {
         case ET_NONE : printf("No file type\n") ; break ;
-        case ET_REL : printf("Relocatable file\n") ; break ;
+        case ET_REL : printf("REL (Relocatable file)\n") ; break ;
         case ET_EXEC : printf("Executable file\n") ; break ;
         case ET_DYN : printf("Shared object file\n") ; break ;
         case ET_CORE : printf("Core file\n") ; break ;
@@ -151,7 +151,7 @@ void print_version(Elf32_Ehdr elf)
 
 void print_entry(Elf32_Ehdr elf)
 {
-    printf("  Entry point access:                0x%x\n", elf.e_entry) ;
+    printf("  Entry point address:               0x%x\n", elf.e_entry) ;
 }
 
 
@@ -195,7 +195,7 @@ void print_flags(Elf32_Ehdr elf)
 
 void print_header_size(Elf32_Ehdr elf)
 {
-    printf("  Size of this headers:              %d (bytes)\n", elf.e_ehsize) ;
+    printf("  Size of this header:               %d (bytes)\n", elf.e_ehsize) ;
 }
 
 
