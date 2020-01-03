@@ -34,7 +34,7 @@ void afficher_sht(Elf32_Shdr section_tab[], int taille, char strtab[]){
 			case SHT_PROGBITS: strcpy(mot,"PROGBITS"); break; 
 			case SHT_SYMTAB: strcpy(mot,"SYMTAB"); break; 
 			case SHT_STRTAB: strcpy(mot,"STRTAB"); break; 
-			case SHT_RELA: strcpy(mot,"REL"); break;  
+			case SHT_RELA: strcpy(mot,"RELA"); break;  
 			case SHT_HASH: strcpy(mot,"HASH"); break; 
 			case SHT_DYNAMIC: strcpy(mot,"DYNAMIC"); break; 
 			case SHT_NOTE: strcpy(mot,"NOTE"); break; 

@@ -3,14 +3,17 @@
 #include <stdint.h>
 #include "elf.h"
 #include "elf_linker-1.0/util.h"
+#include "util_bis.h"
 #include "string.h"
 
 #include "read_elf_sect.h"
 #include "read_elf_head.h"
 #include "read_elf_symt.h"
+#include "read_elf_rel.h"
 #include "print_elf_head.h"
 #include "print_elf_sect.h"
 #include "print_elf_symt.h"
+#include "print_elf_rel.h"
 
 /*Utilisation :
 Argument 1 : Le fichier à traiter ( exemple : exemple1.o )
@@ -49,6 +52,7 @@ int main(int argc,char *argv[]){
     int opt;
     int index;
     int nb_symb;
+    int num_sec;
 
     //Lecture de l'entête
     head = read_header(f);
@@ -89,7 +93,6 @@ int main(int argc,char *argv[]){
         }
         //Affichage d'une section ( à donner en entrée )
         if(strcmp(argv[opt],"-x") == 0){
-            int num_sec;
             printf("Veuillez rentrez un numéro de section : ");
             scanf("%d",&num_sec);
             if(num_sec > head.e_shnum){
@@ -104,7 +107,10 @@ int main(int argc,char *argv[]){
         if((strcmp(argv[opt],"-s") == 0)){
             afficher_symb_tab(symtab,nb_symb,strsymtab);
         }
-
+        //Affichage des relocations
+        if((strcmp(argv[opt],"-r") == 0)){
+            afficher_rel(f,head,section_tab,strtab);
+        }
     }
     fclose(f);
     return 0;
