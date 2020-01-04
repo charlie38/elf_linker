@@ -17,7 +17,7 @@
 
 /*Utilisation :
 Argument 1 : Le fichier à traiter ( exemple : exemple1.o )
-Argument 2-n : Les options à choisir ( -s , -a , -h , -S )
+Argument 2-n : Les options à choisir ( -s , -a , -h , -S , -r)
 */
 
 
@@ -81,6 +81,7 @@ int main(int argc,char *argv[]){
         if(strcmp(argv[opt],"-a") == 0){
             print_elf_head(head);
             afficher_sht(section_tab,head.e_shnum,strtab);
+            afficher_rel(f,head,section_tab,strtab,symtab);
             afficher_symb_tab(symtab,nb_symb,strsymtab);
         }
         //Affichage de l'entête du fichier
@@ -109,7 +110,7 @@ int main(int argc,char *argv[]){
         }
         //Affichage des relocations
         if((strcmp(argv[opt],"-r") == 0)){
-            afficher_rel(f,head,section_tab,strtab);
+            afficher_rel(f,head,section_tab,strtab,symtab);
         }
     }
     fclose(f);

@@ -8,7 +8,7 @@
 #include "read_elf_rel.h"
 
 
-void afficher_rel(FILE *f,Elf32_Ehdr head,Elf32_Shdr section_tab[],char strtab[]){
+void afficher_rel(FILE *f,Elf32_Ehdr head,Elf32_Shdr section_tab[],char strtab[],Elf32_Sym symtab[]){
     int entry;
     int num_sec;
     Elf32_Rel rel;
@@ -19,7 +19,7 @@ void afficher_rel(FILE *f,Elf32_Ehdr head,Elf32_Shdr section_tab[],char strtab[]
             printf("Relocation section '");
             afficher_nom(strtab,section_tab[num_sec].sh_name);
             printf("' at offset 0x%3.3x contains %d entrie(s) :\n",section_tab[num_sec].sh_offset,section_tab[num_sec].sh_size/8);
-            printf("Offset      Info        Type           Sym.Value    Sym.Name\n");
+            printf("Offset      Info        Type           Sym.Index\n");
 
             for(entry=0;entry<section_tab[num_sec].sh_size;entry=entry+8){
 
@@ -31,8 +31,10 @@ void afficher_rel(FILE *f,Elf32_Ehdr head,Elf32_Shdr section_tab[],char strtab[]
                     case R_ARM_CALL: printf("R_ARM_CALL"); break;
                     case R_ARM_JUMP24: printf("R_ARM_JUMP24"); break;
                 }
-            printf("\n");
+                espaces(4);
+                printf("%8.8x    \n",ELF32_R_SYM(rel.r_info));
             }
+            printf("\n");
         }
     }
 }
