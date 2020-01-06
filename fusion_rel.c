@@ -5,30 +5,65 @@
 
 #include "string.h"
 #include "elf.h"
+
 #include "util_bis.h"
 #include "fusion_rel.h"
-#include "read_elf_rel.h"
+#include "section.h"
 
 #define STRING_SIZE_MAX 10000
 
-void fusion_rel(section_tab *tab, char strtab[], Elf32_Sym symtab[], int newOffSet,
+void fusion_rel(tab_section *tab, char strtab[], Elf32_Sym symtab[], int newOffSet,
             FILE *f1, Elf32_Ehdr header1, Elf32_Shdr sections1[], char strtab1[],
             FILE *f2, Elf32_Ehdr header2, Elf32_Shdr sections2[], char strtab2[])
 {
-    int num_sec ;
+    int num_sec, num_sec_bis ;
+    int section_type, section_type_bis ;
+    memorize_read memorize_read ;
+    section section, section_bis ;
+    // Pour sauvegarder les sections lues dans f2
+    create_memorize_read(&memorize_read) ;
     // On parcourt toutes les sections de f1
     for (num_sec = 0 ; num_sec < header1.e_shnum ; num_sec ++)
     {
+        section_type = sections1[num_sec].sh_type ;
         // On lit les sections de relocation
-        if (sections1[num_sec].sh_type == SHT_REL) 
+        if (section_type == SHT_REL || section_type == SHT_RELA) 
         {
-            add_section_to_tab(tab, read_rel_section(false, f1, num_sec, sections1, 
-                                symtab, strtab1, strtab, newOffSet)) ;
+            section = read_rel_section(section_type == SHT_RELA, f1, num_sec, 
+                                        sections1, symtab, strtab1, strtab, newOffSet) ;
+            // On regarde si il en existe une de meme nom dans le deuxieme fichier     
+            for (num_sec_bis = 0 ; num_sec_bis < header2.e_shnum ; num_sec_bis ++)
+            {
+                section_type_bis = sections2[num_sec_bis].sh_type ;
+                // Si oui la lit
+                if (section_type_bis == SHT_REL || section_type_bis == SHT_RELA) 
+                {
+                    section_bis = read_rel_section(section_type_bis == SHT_RELA, f2, 
+                                                num_sec_bis, sections2, symtab, strtab2, strtab, newOffSet) ;          
+                    // On la concatene
+                    concat(&section, section_bis) ; 
+                    // On memorise l'indice pour ne pas relire cette section
+                    add_memorize_read(&memorize_read, num_sec_bis) ;
+                    // Seulement une seule possible donc on sort
+                    break ;
+                }
+            }
+            // On sauvegarde
+            ajouter_tab_section(tab, section) ;   
         }
-        else if (sections1[num_sec].sh_type == SHT_RELA)
+    }
+    // On finit en parcourant toutes les sections de f2
+    for (num_sec = 0 ; num_sec < header2.e_shnum ; num_sec ++)
+    {
+        section_type = sections2[num_sec].sh_type ;
+        // On lit les sections de relocation qui n'ont pas deja ete lues
+        if (section_type == SHT_REL || section_type == SHT_RELA
+            && ! is_in_memorize_read(memorize_read, num_sec)) 
         {
-            add_section_to_tab(tab, read_rel_section(true, f1, num_sec, sections2, 
-                                symtab, strtab1, strtab, newOffSet)) ;
+            section = read_rel_section(section_type == SHT_RELA, f2, num_sec, 
+                                        sections2, symtab, strtab2, strtab, newOffSet) ;
+            // On sauvegarde
+            ajouter_tab_section(tab, section) ;   
         }
     }
 }
@@ -40,7 +75,7 @@ section read_rel_section(bool is_rela, FILE *f, int num_sec, Elf32_Shdr sections
     int entry ;
     section section ;
     // On creer la stucture pour accueillir la section
-    create_rel_section(&section, offSet) ; //sections1[num_sec].sh_offset) ;
+    creer_section(&section, offSet) ; //sections1[num_sec].sh_offset) ;
     // On parcourt la section
     for (entry = 0 ; entry < sections[num_sec].sh_size ; entry += 8)
     {
@@ -49,21 +84,31 @@ section read_rel_section(bool is_rela, FILE *f, int num_sec, Elf32_Shdr sections
         // On recupere le 'rel'
         Elf32_Addr rel_offset = read_rel_offset(f) ;
         Elf32_Word rel_info = read_rel_info(f, old_strtab, new_strtab) ;
+        // Et on sauvegarde
+        ajouter_str_section(&section, sprintf("%d", rel_offset)) ;
+        ajouter_str_section(&section, sprintf("%d", rel_info)) ;
         // Et son addend si c'est un 'rela' defini sur une section
-        if (is_rela && symtab[ELF32_R_SYM(reverse_4(rel_info))] == STT_SECTION)
+        if (is_rela && ELF32_ST_TYPE(symtab[ELF32_R_SYM(reverse_4(rel_info))].st_info) == STT_SECTION)
         {
             Elf32_Sword rel_addend = read_rel_addend(f, rel_info) ;
+            ajouter_str_section(&section, sprintf("%d", rel_addend)) ;
         }
-        // Et on sauvegarde
-        add_rel_to_section() ;
+        
     }
 
     return section ;
 }
 
-/** Retourne l'offset 'du 'rel' a la position de courante de f **/
+/** Retourne l'offset 'du 'rel' a la position de courante de f,
+    en effectuant des modifications **/
 Elf32_Addr read_rel_offset(FILE *f)
-{
+{ 
+
+
+    // TODO RECUPERER l'offset de Nico
+
+
+
     Elf32_Addr offset ;
     // On lit la variable
     fread(&offset, sizeof(Elf32_Addr), 1, f) ;
@@ -99,6 +144,12 @@ Elf32_Word read_rel_info(FILE *f, char old_strtab[], char new_strtab[])
     en effectuant des modifications **/
 Elf32_Sword read_rel_addend(FILE *f, Elf32_Word rel_info)
 {
+    
+
+    // TODO RECUPERER l'offset de HUGO
+
+
+
     Elf32_Sword addend ;
     // On lit la variable
     fread(&addend, sizeof(Elf32_Sword), 1, f) ;
@@ -166,27 +217,30 @@ void get_sym_from_index(char *sym, int index, char strtab[])
     *(sym + i) = '\0' ;
 }
 
-/** Structs **/
+/** Struct **/
 
-void create_rel_section(section *section, int offSet)
+void create_memorize_read(memorize_read *m)
 {
-    section->size = 0 ;
-    section->offSet = offSet ;
+    m->size = 0 ;
 }
 
-void add_rel_to_section(section *section, char *rel)
+void add_memorize_read(memorize_read *m, int element)
 {
-    section->content[section->size] = rel ;
-    section->size ++ ;
+    m->elements[m->size] = element ;
+    m->size ++ ;
 }
 
-void create_sections_tab(section_tab *tab)
+bool is_in_memorize_read(memorize_read m, int element)
 {
-    tab->size = 0 ;
-}
+    int i ;
 
-void add_section_to_tab(section_tab *tab, char *section)
-{
-    tab->content[tab->size] = section ;
-    tab->size ++ ;
+    for (i = 0 ; i < m.size ; i ++)
+    {
+        if (m.elements[i] == element)
+        {
+            return true ;
+        }
+    } 
+
+    return false ;
 }

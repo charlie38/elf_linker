@@ -3,29 +3,29 @@
 
 #include <elf.h>
 #include <stdio.h>
+#include <stdbool.h>
+
+#include "section.h"
 
 #define SIZE_MAX_ 50000
 
-/** Contient une section 'ler' tel que dans le fichier source **/
+/** Structure pour memoriser les indices des sections deja lues dans le 2e fichier **/
 typedef struct 
 {
-    int offSet ;
     int size ;
-    char *content[SIZE_MAX_] ;
+    int elements[] ;
 }
-section ;
+memorize_read ;
 
-/** Contient plusieurs section 'ler' **/
-typedef struct 
-{
-    int size ;
-    char *content[SIZE_MAX_] ;
-}
-section_tab ;
+void create_memorize_read(memorize_read *m) ;
+
+void add_memorize_read(memorize_read *m, int element) ;
+
+bool is_in_memorize_read(memorize_read m, int element) ;
 
 /** Fusionne les sections 'ler' et 'lera' des deux fichiers elf contenus dans f1 et f2,
     et definis par les parametres **/
-void fusion_rel(section_tab *tab, char strtab[], Elf32_Sym symtab[], int newOffSet,
+void fusion_rel(tab_section *tab, char strtab[], Elf32_Sym symtab[], int newOffSet,
             FILE *f1, Elf32_Ehdr header1, Elf32_Shdr sections1[], char strtab1[],
             FILE *f2, Elf32_Ehdr header2, Elf32_Shdr sections2[], char strtab2[]) ; 
 
@@ -49,13 +49,5 @@ Elf32_Word find_new_sym_index(int old_index, char old_strtab[], char new_strtab[
 
 /** Cherche le string associe a l'index donne **/
 void get_sym_from_index(char *sym, int index, char strtab[]) ;
-
-void create_rel_section(section *section, int offSet) ;
-
-void add_rel_to_section(section *section, char *rel) ;
-
-void create_sections_tab(section_tab *tab) ;
-
-void add_section_to_tab(section_tab *tab, char *section) ;
 
 #endif
