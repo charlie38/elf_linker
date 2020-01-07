@@ -30,13 +30,13 @@ bool is_in_memorize_read(memorize_read m, int element) ;
 
 /** Fusionne les sections 'ler' et 'lera' des deux fichiers elf contenus dans f1 et f2,
     et definis par les parametres **/
-void fusion_rel(tab_section *tab, char strtab[], Elf32_Sym symtab[], int newOffSet,
+void fusion_rel(tab_section *tab, char strtab[], Elf32_Sym symtab[], 
             FILE *f1, Elf32_Ehdr header1, Elf32_Shdr sections1[], char strtab1[],
             FILE *f2, Elf32_Ehdr header2, Elf32_Shdr sections2[], char strtab2[]) ; 
 
 /** Lit la section 'rel' ou 'rela' dans f, definie par les parametres **/
 section read_rel_section(bool is_rela, FILE *f, Elf32_Shdr sectionHeader, 
-		Elf32_Sym symtab[], char old_strtab[], char new_strtab[], int offSet) ;
+		Elf32_Sym symtab[], char old_strtab[], char new_strtab[]) ;
 
 /** Retourne l'offset 'du 'rel' a la position de courante de f **/
 Elf32_Addr read_rel_offset(FILE *f) ;

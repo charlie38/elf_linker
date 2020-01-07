@@ -15,7 +15,7 @@
 
 FILE *F2 ;
 
-void fusion_rel(tab_section *tab, char strtab[], Elf32_Sym symtab[], int newOffSet,
+void fusion_rel(tab_section *tab, char strtab[], Elf32_Sym symtab[],
             FILE *f1, Elf32_Ehdr header1, Elf32_Shdr sections1[], char strtab1[],
             FILE *f2, Elf32_Ehdr header2, Elf32_Shdr sections2[], char strtab2[])
 {
@@ -35,7 +35,7 @@ void fusion_rel(tab_section *tab, char strtab[], Elf32_Sym symtab[], int newOffS
         if (section_type == SHT_REL || section_type == SHT_RELA) 
         {
             section = read_rel_section(section_type == SHT_RELA, f1, sections1[num_sec],
-					symtab, strtab1, strtab, newOffSet) ;
+					symtab, strtab1, strtab) ;
             // On regarde si il en existe une de meme nom dans le deuxieme fichier     
             for (num_sec_bis = 0 ; num_sec_bis < header2.e_shnum ; num_sec_bis ++)
             {
@@ -44,7 +44,7 @@ void fusion_rel(tab_section *tab, char strtab[], Elf32_Sym symtab[], int newOffS
                 if (section_type_bis == SHT_REL || section_type_bis == SHT_RELA) 
                 {
                     section_bis = read_rel_section(section_type_bis == SHT_RELA, f2, 
-							sections2[num_sec_bis], symtab, strtab2, strtab, newOffSet) ;          
+							sections2[num_sec_bis], symtab, strtab2, strtab) ;          
                     // On la concatene
                     concat(&section, section_bis) ; 
                     // On memorise l'indice pour ne pas relire cette section
@@ -66,7 +66,7 @@ void fusion_rel(tab_section *tab, char strtab[], Elf32_Sym symtab[], int newOffS
             && ! is_in_memorize_read(memorize_read, num_sec)) 
         {
             section = read_rel_section(section_type == SHT_RELA, f2, sections2[num_sec],
-					symtab, strtab2, strtab, newOffSet) ;
+					symtab, strtab2, strtab) ;
             // On sauvegarde
             insert_tab_section(tab, section) ;   
         }
@@ -75,7 +75,7 @@ void fusion_rel(tab_section *tab, char strtab[], Elf32_Sym symtab[], int newOffS
 
 /** Lit la section 'rel' ou 'rela' dans f, definie par les parametres **/
 section read_rel_section(bool is_rela, FILE *f, Elf32_Shdr sectionHeader, 
-		Elf32_Sym symtab[], char old_strtab[], char new_strtab[], int offSet)
+		Elf32_Sym symtab[], char old_strtab[], char new_strtab[])
 {
     int entry ;
     section section ;
