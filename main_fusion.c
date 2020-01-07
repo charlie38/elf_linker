@@ -45,8 +45,26 @@ void get_strtab(FILE *f, Elf32_Ehdr header, Elf32_Shdr sections[], char *strtab)
     read_string_table(f, header, sections, strtab, header.e_shstrndx) ;
 }
 
+void ecrire_section(FILE *f, section section)
+{
+	int i ;
+
+	for (i = 0 ; i < section.taille ; i ++)
+	{
+		fprintf(f, "%c", section.content[i]) ;
+	}
+}
+
 int main(int argc, char *argv[])
 {
+    // Declaration des variables
+    FILE *f1, *f2, *f3 ;
+    Elf32_Ehdr header1, header2 ;
+    Elf32_Shdr sections1[SECTION_TAB_SIZE], sections2[SECTION_TAB_SIZE] ;
+    Elf32_Sym symtab1[SYM_TAB_SIZE], symtab2[SYM_TAB_SIZE] ;
+	char strtab1[STR_TAB_SIZE], strtab2[STR_TAB_SIZE] ;
+	tab_section tab_section ;
+	int i ;
     // Gestion erreurs nombre arguments
     if (argc < 4)
 	{
@@ -54,7 +72,6 @@ int main(int argc, char *argv[])
         return ERROR_NB_FILES ;
     }
     // Ouverture fichiers
-    FILE *f1, *f2, *f3 ;
     f1 = fopen(argv[1], "r") ;
     f2 = fopen(argv[2], "r") ;
     f3 = fopen(argv[3], "w") ;
@@ -76,13 +93,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "ERREUR : troisieme fichier non accessible en ecriture\n") ; 
         return ERROR_WRITE_FILE ;
     }
-    // Declaration des variables
-    Elf32_Ehdr header1, header2 ;
-    Elf32_Shdr sections1[SECTION_TAB_SIZE], sections2[SECTION_TAB_SIZE] ;
-    Elf32_Sym symtab1[SYM_TAB_SIZE], symtab2[SYM_TAB_SIZE] ;
-	char strtab1[STR_TAB_SIZE], strtab2[STR_TAB_SIZE] ;
-	tab_section tab_section ;
-	// Et initialisation
+	// Initialisation
 	creer_tab_section(&tab_section) ;
 	get_header(f1, &header1) ;
 	get_header(f2, &header2) ;
@@ -100,8 +111,11 @@ int main(int argc, char *argv[])
 	// On fusionne les tables de reimplantation 
 	fusion_rel(tab_section, strtab, symtab, f1, header1, sections1, strtab1, 
 			f2, header2, sections2, strtab2) ;
-	// Ecriture
-	// TODO
+	// Ecriture des sections
+	for (i = 0 ; i < tab_section.nb ; i ++)
+	{
+		ecrire_section(f3, tab_section.T[i]) ;
+	}
 	// Libere la memoire
 	fclose(f1) ;
 	fclose(f2) ;
