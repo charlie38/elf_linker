@@ -3,6 +3,16 @@
 #include "elf.h"
 #include "section.h" 
 
+int create_section_header(Elf32_Shdr tab[],tab_section sections)
+{
+    int i;
+    for(i=0;i<sections.taille)
+	{
+        tab[i]=sections.T[i].header;
+    }
+    return sections.nb;
+}
+
 void creer_section(section *S, int offSet)
 {
 	S->taille = 0 ;

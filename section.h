@@ -2,16 +2,28 @@
 #define SECTION_H
 #define SIZE_MAX_ 50000
 
-typedef struct{
-  int offset;
-  int taille;
-  char content[SIZE_MAX_];
-} section;
+#include "elf.h"
 
-typedef struct{
-  section T[SIZE_MAX_];
-  int nb;
-} tab_section;
+/** Structures permetant de reecrire les sections dans le
+ * fichier resultat **/
+
+typedef struct
+{
+	Elf32_Shdr header ;
+	int offset ;
+	int taille ;
+	char content[SIZE_MAX_] ;
+} 
+section ;
+
+typedef struct
+{
+	section T[SIZE_MAX_] ;
+	int nb ;
+}
+tab_section ;
+
+int create_section_header(Elf32_Shdr tab[],tab_section sections) ;
 
 void creer_section(section *S, int offSet);
 
