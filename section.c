@@ -39,7 +39,7 @@ void ajouter_str_section(section *S, char *s)
 	}
 }
 
-void creer_tab_section(tab_section *T, int offSet)
+void creer_tab_section(tab_section *T)
 {
 	T->nb = 0 ;
 }

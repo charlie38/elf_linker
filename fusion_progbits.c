@@ -10,7 +10,7 @@
 
 //fusion et enregistrement
 
-void fus_all_progbits(FILE* A, FILE* B, tab_section* tab, Elf32_Shdr ShdrA[], 
+void fusion_progbits(FILE* A, FILE* B, tab_section* tab, Elf32_Shdr ShdrA[], 
 		int nbsectA, Elf32_Shdr ShdrB[], int nbsectB, char strTab[]){
 	int i, j, cond, decalage;
 	section a,b;
@@ -35,8 +35,8 @@ void fus_all_progbits(FILE* A, FILE* B, tab_section* tab, Elf32_Shdr ShdrA[],
 				if( !strcmp(get_only_name(strTab, ShdrA[i].sh_name), get_only_name(strTab, ShdrB[i].sh_name)) ){
 
 					//Lecture et enregistrement des deux sections
-					a = read_section(A, ShdrA[i].sh_offset, ShdrA[i].sh_size) ;
-					b = read_section(B, ShdrB[i].sh_offset, ShdrB[i].sh_size) ;
+					a = read_section(A, ShdrA[i]) ;
+					b = read_section(B, ShdrB[i]) ;
 
 					//Concatenation des deux sections
 					concat(&a,b);
@@ -59,7 +59,7 @@ void fus_all_progbits(FILE* A, FILE* B, tab_section* tab, Elf32_Shdr ShdrA[],
 
 		//Si on n'a pas ajoute la section courante, on l'ajoute
 		if(cond==0 && ShdrA[i].sh_type != SHT_SYMTAB && ShdrA[i].sh_type != SHT_STRTAB && ShdrA[i].sh_type != SHT_REL){
-			a = read_section(A, ShdrA[i].sh_offset, ShdrA[i].sh_size) ;
+			a = read_section(A, ShdrA[i]) ;
 			a.header.sh_offset += decalage ;
 			tab->T[tab->nb]=a;
 			tab->nb++;
@@ -72,7 +72,7 @@ void fus_all_progbits(FILE* A, FILE* B, tab_section* tab, Elf32_Shdr ShdrA[],
 
 		//Si la section j de ShdrB n'est pas presente et est de type progbits
 		if(presents[j]==-1 && ShdrB[i].sh_type != SHT_SYMTAB && ShdrB[i].sh_type != SHT_STRTAB && ShdrB[i].sh_type != SHT_REL && ShdrB[i].sh_type != SHT_NULL){
-			b = read_section(B, ShdrB[j].sh_offset, ShdrB[j].sh_size) ;
+			b = read_section(B, ShdrB[j]) ;
 			tab->T[tab->nb]=b;
 			tab->nb++;
 		}
