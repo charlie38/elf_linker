@@ -26,7 +26,7 @@ int main(int argc,char *argv[]){
 
     //Gestion erreurs nombre argument
     if(argc < 3){
-        printf("Erreur, pas de fichier donnée !\n");
+        printf("Erreur, pas de fichier/arguments donné(s) !\n");
         return 3;
     }
 
