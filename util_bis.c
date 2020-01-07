@@ -25,6 +25,11 @@ int afficher_nom(char strtab[],int i){
 	return j;
 }
 
+char *get_only_name(char strtab[], int i)
+{
+	return &strtab[i] ;
+}
+
 char *get_name(char strtab[],int i){
 	printf("Valeur %d : %s\n",i,&strtab[i]);
 	return &strtab[i];

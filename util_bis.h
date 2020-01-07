@@ -14,6 +14,9 @@ Renvoie un entier pour la taille du mot affiche et donc peut aider pour les espa
 int afficher_nom(char strtab[],int i);
 
 /*Fonction permettant de recuperer le nom associe au symbole*/
+char *get_only_name(char strtab[], int i) ;
+
+/*Fonction permettant de recuperer le nom associe au symbole (+ affichage)*/
 char *get_name(char strtab[],int i);
 
 #endif

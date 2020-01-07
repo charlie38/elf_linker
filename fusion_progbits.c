@@ -32,7 +32,7 @@ void fus_all_progbits(FILE* A, FILE* B, tab_section* tab, Elf32_Shdr ShdrA[],
 			for(j=0; j<nbsectB; j++){
 
 				//Si les deux sections ont le meme nom
-				if( !strcmp(afficher_nom(strTab, ShdrA[i].sh_name),afficher_nom(strTab, ShdrB[i].sh_name)) ){
+				if( !strcmp(get_only_name(strTab, ShdrA[i].sh_name), get_only_name(strTab, ShdrB[i].sh_name)) ){
 
 					//Lecture et enregistrement des deux sections
 					a = read_section(A, ShdrA[i].sh_offset, ShdrA[i].sh_size) ;
