@@ -17,4 +17,4 @@ read: $(OBJ)
 -include $(DEPS)
 
 %.dep: %.c
-	$(CC) $(CFLAGS) -MM $< >$@
+	@$(CC) $(CFLAGS) -MM $< >$@
