@@ -26,18 +26,23 @@ int fusion_symtab(Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb_symbA,int nb_sy
     int j;
     int save_j;
     int indice_sym = 0;
+
     Elf32_Sym symtab_fu[maxi(nb_symbA,nb_symbB)*2];  //symtab_fu est la symtab finale , après fusion
-    char strsymtab[NMAX]; //strsymtab est  la table pour les noms des symboles après fusion
+    StrsymFu strfu; //strsymtab est  la table pour les noms des symboles après fusion 
+    strfu.taille = 1;
+    strfu.strsymtab[0] = '\0'; 
+
+    int ind_strsymt = 1;
 
     int traite[nb_symbB]; //Si la valeur est 1 , alors il a été traité (pour les cas avec GLOBAL non défini)
 
     /*Traitement de tous les symboles du fichier A ( avec ceux en communs du B )*/
     for(i=0;i<nb_symbA;i++){
+        if(i>3)symtabB[i].st_value = 1;
         save_j = 0;
         switch(ELF32_ST_BIND(symtabA[i].st_info)){
 
             case STB_LOCAL: //Si c'est LOCAL , alors on met le symbole dans tous les cas
-
                 for(j=0;j<nb_symbB;j++){ //Test pour voir si un symbole du fichier B est identique , ausquel cas il sera en une fois.
                     if(comparer_symbole(symtabB[j],symtabA[i]) == 0){
                         traite[j] = 1; //On le marque donc
@@ -47,7 +52,9 @@ int fusion_symtab(Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb_symbA,int nb_sy
                 }
                 /*Ajout du symbole , correction de l'offset pour la valeur et ajout du nom dans la strsymtab*/
                 symtab_fu[indice_sym] = symtabA[i];
-                /**********FONCTION CONCATENANT LA STRSYMTAB**********/
+                strfu.taille = strcat2(strfu.strsymtab,get_name(strtabA,symtabA[i].st_name),strfu.taille);
+                if(symtabA[i].st_name != 0)
+                ind_strsymt+=strlen(get_name(strtabA,symtabA[i].st_name))+1;
                 break;
 
             case STB_GLOBAL: //Si c'est GLOBAL , alors il faut vérifier les différents cas
@@ -77,12 +84,17 @@ int fusion_symtab(Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb_symbA,int nb_sy
                 if(save_j != 0){
                     /*Ajout du symbole , correction de l'offset pour la valeur et ajout du nom dans la strsymtab*/
                     symtab_fu[indice_sym] = symtabB[save_j];
-                    /**********FONCTION CONCATENANT LA STRSYMTAB**********/
+                    strfu.taille = strcat2(strfu.strsymtab,get_name(strtabB,symtabB[save_j].st_name),strfu.taille);
+                    if(symtabB[save_j].st_name != 0)
+                    ind_strsymt+=strlen(get_name(strtabB,symtabB[save_j].st_name))+1;
                 }
                 else {
                     /*Ajout du symbole , correction de l'offset pour la valeur et ajout du nom dans la strsymtab*/
                     symtab_fu[indice_sym] = symtabA[i];
-                    /**********FONCTION CONCATENANT LA STRSYMTAB**********/
+                    strfu.taille = strcat2(strfu.strsymtab,get_name(strtabA,symtabA[i].st_name),strfu.taille);
+                    if(symtabA[i].st_name != 0)
+                    ind_strsymt+=strlen(get_name(strtabA,symtabA[i].st_name))+1;
+
                 }
                 break;
         }
@@ -92,10 +104,15 @@ int fusion_symtab(Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb_symbA,int nb_sy
     /*Traitement de tous les symboles du fichier B pas encore traites*/
     for(i=0;i<nb_symbB;i++){
         if(traite[i] != 1){
-            symtab_fu[nb_symbA+i] = symtabB[i];
-            /**********FONCTION CONCATENANT LA STRSYMTAB**********/
+            symtab_fu[indice_sym] = symtabB[i];
+            if(ELF32_ST_BIND(symtabB[i].st_info) == STB_GLOBAL){
+                strfu.taille = strcat2(strfu.strsymtab,get_name(strtabB,symtabB[i].st_name),strfu.taille);
+                symtab_fu[indice_sym].st_name = ind_strsymt;
+                ind_strsymt+=strlen(get_name(strtabB,symtabB[i].st_name))+1;
+            }
+            indice_sym+=1;
         }
     }
-    afficher_symb_tab(symtab_fu,indice_sym,strsymtab);
+    afficher_symb_tab(symtab_fu,indice_sym,strfu.strsymtab);
     return indice_sym;
 }

@@ -16,21 +16,30 @@ void espaces(int n){
 
 int afficher_nom(char strtab[],int i){
 	int j = 0;
-	if(strtab[i] != '\0')
-	while(strtab[i] != '\0'){
+	while(strtab[j] != '\0'){
 		j++;
-		i++;
-		printf("%c",strtab[i-1]);
 	}
+	printf("%s",&strtab[i]);
 	return j;
 }
 
-char *get_only_name(char strtab[], int i)
-{
-	return &strtab[i] ;
+char *get_name(char strtab[],int i){
+	return &strtab[i];
 }
 
-char *get_name(char strtab[],int i){
-	printf("Valeur %d : %s\n",i,&strtab[i]);
-	return &strtab[i];
+int strcat2(char *dest,char *src,int taille){
+	int len_src = strlen(src);
+	if(len_src == 0){
+		dest[taille] = '\0';
+		return taille;
+	}
+	else{
+	int i;
+	int t = taille;
+	for(i=0;i<len_src+1;i++){
+		dest[t] = src[i];
+		t++;
+	}
+	return t;
+	}
 }
