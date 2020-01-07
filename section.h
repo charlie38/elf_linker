@@ -1,15 +1,15 @@
 #ifndef SECTION_H
 #define SECTION_H
-#define SIZE_MAX 50000
+#define SIZE_MAX_ 50000
 
 typedef struct{
   int offset;
   int taille;
-  char content[SIZE_MAX];
+  char content[SIZE_MAX_];
 } section;
 
 typedef struct{
-  section T[SIZE_MAX];
+  section T[SIZE_MAX_];
   int nb;
 } tab_section;
 

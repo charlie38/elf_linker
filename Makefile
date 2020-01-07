@@ -6,8 +6,10 @@ OBJ=$(patsubst %.c,%.o,$(SOURCES))
 
 .PHONY: clean
 
+all : read clean
+
 clean:
-	rm *.dep *.o read
+	rm *.dep *.o
 
 read: $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
