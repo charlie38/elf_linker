@@ -1,6 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "util_bis.h"
+#include "string.h"
+#include "elf.h"
+
+int maxi(int a,int b){
+	if(a>b)return a;
+	else return b;
+}
 
 void espaces(int n){
 	int i;
@@ -16,4 +23,9 @@ int afficher_nom(char strtab[],int i){
 		printf("%c",strtab[i-1]);
 	}
 	return j;
+}
+
+char *get_name(char strtab[],int i){
+	printf("Valeur %d : %s\n",i,&strtab[i]);
+	return &strtab[i];
 }

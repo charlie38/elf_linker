@@ -3,18 +3,31 @@
 #include "string.h"
 #include "elf.h"
 
+#include "util_bis.h"
 #include "fusion_symtab.h"
+#include "print_elf_symt.h"
 
-int fusion_symtab(FILE *A,FILE *B,Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb_symbA,int nb_symbB){
+/*Fonction comparant deux symboles , renvoie 0 si ils sont égaux*/
+int comparer_symbole(Elf32_Sym symA,Elf32_Sym symB){
+    int res = 0;
+    if(symA.st_name != symB.st_name) res = 1;
+    if(symA.st_value != symB.st_value) res = 1;
+    if(symA.st_size != symB.st_size) res = 1;
+    if(symA.st_info != symB.st_info) res = 1;
+    if(symA.st_other != symB.st_other) res = 1;
+    if(symA.st_shndx != symB.st_shndx) res = 1;
+    return res;
+}
+
+int fusion_symtab(Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb_symbA,int nb_symbB,char strtabA[],char strtabB[]){
 
     /*Déclaration des variables - tableaux*/
     int i;
     int j;
     int save_j;
     int indice_sym = 0;
-
-    Elf32_Sym symtab_fu[max(nb_symbA,nb_symbB)*2];  //symtab_fu est la symtab finale , après fusion
-    char strsymtab[NMAX]; //strsymbtab est  la table pour les noms des symboles après fusion
+    Elf32_Sym symtab_fu[maxi(nb_symbA,nb_symbB)*2];  //symtab_fu est la symtab finale , après fusion
+    char strsymtab[NMAX]; //strsymtab est  la table pour les noms des symboles après fusion
 
     int traite[nb_symbB]; //Si la valeur est 1 , alors il a été traité (pour les cas avec GLOBAL non défini)
 
@@ -26,7 +39,7 @@ int fusion_symtab(FILE *A,FILE *B,Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb
             case STB_LOCAL: //Si c'est LOCAL , alors on met le symbole dans tous les cas
 
                 for(j=0;j<nb_symbB;j++){ //Test pour voir si un symbole du fichier B est identique , ausquel cas il sera en une fois.
-                    if(symtabB[j] = symtabA[i]){
+                    if(comparer_symbole(symtabB[j],symtabA[i]) == 0){
                         traite[j] = 1; //On le marque donc
                         save_j = j;
                         j+= nb_symbB;
@@ -34,13 +47,12 @@ int fusion_symtab(FILE *A,FILE *B,Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb
                 }
                 /*Ajout du symbole , correction de l'offset pour la valeur et ajout du nom dans la strsymtab*/
                 symtab_fu[indice_sym] = symtabA[i];
-                ajouter_nom(strsymtab,symtabA[i].st_name);
+                /**********FONCTION CONCATENANT LA STRSYMTAB**********/
                 break;
 
             case STB_GLOBAL: //Si c'est GLOBAL , alors il faut vérifier les différents cas
-
                 for(j=0;j<nb_symbB;j++){
-                    if(get_name(symtabA[i]) = get_name(symtabB[j])){ //Test des noms identiques
+                    if(!strcmp(get_name(strtabA,symtabA[i].st_name),get_name(strtabB,symtabB[j].st_name)) && ELF32_ST_BIND(symtabB[j].st_info) == STB_GLOBAL ){ //Test des noms identiques
                         /*Cas où le symbole du fichier B est défini , mais pas dans le A --> choix pour le fichier B*/
                         if(symtabA[i].st_shndx == STN_UNDEF && symtabB[j].st_shndx != STN_UNDEF){
                             save_j = j;
@@ -56,7 +68,7 @@ int fusion_symtab(FILE *A,FILE *B,Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb
                         }
                         /*Cas où même nom , mais tous les deux définis dans chacune des tables*/
                         if(symtabA[i].st_shndx != STN_UNDEF && symtabB[j].st_shndx != STN_UNDEF){
-                            printf("Erreur , impossible d'avoir 2 symboles de type GLOBAL du même nom !");
+                            printf("Erreur , impossible d'avoir 2 symboles de type GLOBAL du même nom !\n");
                             return 5;
                         }
                         traite[j] = 1; //Symbole marque
@@ -65,22 +77,25 @@ int fusion_symtab(FILE *A,FILE *B,Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb
                 if(save_j != 0){
                     /*Ajout du symbole , correction de l'offset pour la valeur et ajout du nom dans la strsymtab*/
                     symtab_fu[indice_sym] = symtabB[save_j];
-                    ajouter_nom(strsymtab,symtabB[save_j].st_name);
+                    /**********FONCTION CONCATENANT LA STRSYMTAB**********/
                 }
                 else {
                     /*Ajout du symbole , correction de l'offset pour la valeur et ajout du nom dans la strsymtab*/
                     symtab_fu[indice_sym] = symtabA[i];
-                    ajouter_nom(strsymtab,symtabA[i].st_name);
+                    /**********FONCTION CONCATENANT LA STRSYMTAB**********/
                 }
                 break;
         }
+        indice_sym+=1;
     }
 
     /*Traitement de tous les symboles du fichier B pas encore traites*/
     for(i=0;i<nb_symbB;i++){
         if(traite[i] != 1){
             symtab_fu[nb_symbA+i] = symtabB[i];
+            /**********FONCTION CONCATENANT LA STRSYMTAB**********/
         }
     }
-    return 0;
+    afficher_symb_tab(symtab_fu,indice_sym,strsymtab);
+    return indice_sym;
 }
