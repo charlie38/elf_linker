@@ -41,4 +41,6 @@ void afficher_sections(tab_section tab);
 
 void concat(section* A, section B);
 
+section read_section(FILE* f, int offset, int taille) ;
+
 #endif
