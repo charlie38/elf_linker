@@ -17,11 +17,16 @@ typedef struct
 }
 memorize_read ;
 
+/** Constructeur **/
 void create_memorize_read(memorize_read *m) ;
 
+/** Fonction d'ajout **/
 void add_memorize_read(memorize_read *m, int element) ;
 
+/** Retourne vrai si 'element' appartient à 'm' **/
 bool is_in_memorize_read(memorize_read m, int element) ;
+
+/** -- **/
 
 /** Fusionne les sections 'ler' et 'lera' des deux fichiers elf contenus dans f1 et f2,
     et definis par les parametres **/
@@ -30,8 +35,8 @@ void fusion_rel(tab_section *tab, char strtab[], Elf32_Sym symtab[], int newOffS
             FILE *f2, Elf32_Ehdr header2, Elf32_Shdr sections2[], char strtab2[]) ; 
 
 /** Lit la section 'rel' ou 'rela' dans f, definie par les parametres **/
-section read_rel_section(bool is_rela, FILE *f, int num_sec, Elf32_Shdr sections[], 
-                            Elf32_Sym symtab[], char old_strtab[], char new_strtab[], int offSet) ;
+section read_rel_section(bool is_rela, FILE *f, Elf32_Shdr sectionHeader, 
+		Elf32_Sym symtab[], char old_strtab[], char new_strtab[], int offSet) ;
 
 /** Retourne l'offset 'du 'rel' a la position de courante de f **/
 Elf32_Addr read_rel_offset(FILE *f) ;
@@ -40,14 +45,22 @@ Elf32_Addr read_rel_offset(FILE *f) ;
     en effectuant des modifications **/
 Elf32_Word read_rel_info(FILE *f, char old_strtab[], char new_strtab[]) ;
 
-/** Retourne l'addend du 'rel' a la position de courante de f, 
-    en effectuant des modifications **/
-Elf32_Sword read_rel_addend(FILE *f, Elf32_Word rel_info) ;
+/** Retourne l'addend du 'rela' a la position de courante de f */ 
+Elf32_Sword read_rel_addend(FILE *f) ;
+
+/** Modifie l'addend du 'rela' en ajoutant l'offset de la table de symboles si besoin **/
+void modif_rel_addend(FILE *f, Elf32_Sword *addend, Elf32_Word rel_info) ;
 
 /** Retourne le nouvel index associe au string donne **/
 Elf32_Word find_new_sym_index(int old_index, char old_strtab[], char new_strtab[]) ;
 
 /** Cherche le string associe a l'index donne **/
 void get_sym_from_index(char *sym, int index, char strtab[]) ;
+
+/** Insere la section juste apres sa section 'PROGBITS' associee (si elle existe) **/
+void insert_tab_section(tab_section *tab, section section) ;
+
+/** Retourne vrai si le fichier correspond au second **/
+bool is_f2(FILE *f) ;
 
 #endif

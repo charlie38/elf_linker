@@ -15,10 +15,10 @@ int create_section_header(Elf32_Shdr tab[],tab_section sections)
 	return sections.nb ;
 }
 
-void creer_section(section *S, int offSet)
+void creer_section(section *S, Elf32_Shdr header)
 {
 	S->taille = 0 ;
-	S->offset = offSet ;
+	S->header = header ;
 }
 
 void ajouter_char_section(section *S, char c)
@@ -74,23 +74,47 @@ void concat(section* A, section B)
 	for(i = 0 ; i < B.taille ; i ++)
 	{
 		A->content[A->taille] = B.content[i] ;
-		A->taille ++ ;
 	}
+
+	A->taille += B.taille ;
 }
 
-section read_section(FILE* f, int offset, int taille)
+section read_section(FILE* f, Elf32_Shdr header)
 {
-	fseek(f,offset,SEEK_SET) ;
+	fseek(f, header.sh_offset, SEEK_SET) ;
 	int i ;
 	section S ;
 
-	for(i = 0 ; i < taille ; i++)
+	for(i = 0 ; i < header.sh_size ; i++)
 	{
 		fread(&S.content[i], sizeof(char), 1, f) ;
 	}
 
-	S.offset = offset ;
-	S.taille = taille ;
+	S.header = header ;
+	S.taille = header.sh_size ;
 
 	return S ;
+}
+
+void modifier_section_offset(section *S, int new_offset)
+{
+	S->header.sh_offset = new_offset ;
+}
+
+void modifier_section_taille(section *S, int new_taille)
+{
+	S->header.sh_size = new_taille ;
+}
+
+void inserer_tab_section(tab_section *T, section S, int index)
+{
+	int i ;
+
+	for (i = T->nb - 1 ; i > index ; i --)
+	{
+		T->T[i + 1] = T->T[i] ;
+	}
+
+	T->T[index] = S ;
+	T->nb ++ ;
 }
