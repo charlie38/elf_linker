@@ -47,6 +47,16 @@ void get_strtab(FILE *f, Elf32_Ehdr header, Elf32_Shdr sections[], char *strtab)
     read_string_table(f, header, sections, strtab, header.e_shstrndx) ;
 }
 
+void create_new_header(Elf32_Ehdr *header, Elf32_Ehdr header1, Elf32_Ehdr header2,
+		tab_section tab_section)
+{
+	header->e_shoff = tab_section.T[tab_section.nb - 1].header.sh_offset 
+		+ tab_section.T[tab_section.nb - 1].header.sh_size + 1 ;
+    header->e_flags = header1.e_flags || header2.e_flags;
+    header->e_shnum = tab_section.nb ;
+    header->e_shstrndx = SHN_UNDEF ;
+}
+
 int main(int argc, char *argv[])
 {
     // Declaration des variables
@@ -109,8 +119,9 @@ int main(int argc, char *argv[])
 	fusion_rel(&tab_section, strtab, symtab, sections2[header2.e_shstrndx].sh_size,
 			f1, header1, sections1, strtab1, 
 			f2, header2, sections2, strtab2) ;
-	// On lit le header
-	header = 
+	// On creer le nouveau header
+	header = header1 ;
+	create_new_header(&header, header1, header2, tab_section) ;
 	// Ecriture du header
 	write_header(f3, header) ;
 	// Ecriture des sections
