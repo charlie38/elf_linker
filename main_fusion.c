@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 	// On transforme la table de symboles en section
 	taille = sections1[index_symtab(sections1)].sh_size / sizeof(Elf32_Sym)
 		+ sections2[index_symtab(sections2)].sh_size / sizeof(Elf32_Sym) ;
-	name = ;
+	name = tab_section.nb ;
 	flags = sections1[index_symtab(sections1)].sh_flags 
 		+ sections2[index_symtab(sections2)].sh_flags ; 
 	offset = tab_section.T[tab_section.nb - 1].header.sh_offset 
@@ -137,8 +137,9 @@ int main(int argc, char *argv[])
 			symtab_to_section(symtab, taille, name, flags, offset)) ;
 	// On transforme la table des strings en section
 	taille = sizeof(strtab) / sizeof(char) ;
-	name = ;
-	flags = 
+	name = tab_section.nb ;
+	flags = sections1[index_strtab(sections1)].sh_flags
+		+ sections2[index_strtab(sections2)].sh_flags ; 
 	offset = tab_section.T[tab_section.nb - 1].header.sh_offset 
 		+ tab_section.T[tab_section.nb - 1].header.sh_size ; 
 	ajouter_tab_section(&tab_section, 
@@ -149,7 +150,8 @@ int main(int argc, char *argv[])
 		ecrire_section(f3, tab_section.T[i]) ;
 	}
 	// Et de la table des section headers
-	offset = 
+	offset = tab_section.T[tab_section.nb - 1].header.sh_offset 
+		+ tab_section.T[tab_section.nb - 1].header.sh_size ; 
 	get_all_headers(tab_section, sections) ; 	
 	write_section_header(f3, sections, offset, header.e_shnum) ;
 	// Libere la memoire
