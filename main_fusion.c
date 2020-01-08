@@ -62,11 +62,12 @@ int main(int argc, char *argv[])
     // Declaration des variables
     FILE *f1, *f2, *f3 ;
     Elf32_Ehdr header, header1, header2 ;
-    Elf32_Shdr sections1[SECTION_TAB_SIZE], sections2[SECTION_TAB_SIZE] ;
+    Elf32_Shdr sections[SECTION_TAB_SIZE], sections1[SECTION_TAB_SIZE], 
+			   sections2[SECTION_TAB_SIZE] ;
     Elf32_Sym symtab[SYM_TAB_SIZE], symtab1[SYM_TAB_SIZE], symtab2[SYM_TAB_SIZE] ;
 	char strtab[STR_TAB_SIZE], strtab1[STR_TAB_SIZE], strtab2[STR_TAB_SIZE] ;
 	tab_section tab_section ;
-	int i ;
+	int i, taille, name, flags, offset ;
     // Gestion erreurs nombre arguments
     if (argc < 4)
 	{
@@ -124,6 +125,24 @@ int main(int argc, char *argv[])
 	create_new_header(&header, header1, header2, tab_section) ;
 	// Ecriture du header
 	write_header(f3, header) ;
+	// On transforme la table de symboles en section
+	taille = sections1[index_symtab(sections1)].sh_size / sizeof(Elf32_Sym)
+		+ sections2[index_symtab(sections2)].sh_size / sizeof(Elf32_Sym) ;
+	name = ;
+	flags = sections1[index_symtab(sections1)].sh_flags 
+		+ sections2[index_symtab(sections2)].sh_flags ; 
+	offset = tab_section.T[tab_section.nb - 1].header.sh_offset 
+		+ tab_section.T[tab_section.nb - 1].header.sh_size ; 
+	ajouter_tab_section(&tab_section, 
+			symtab_to_section(symtab, taille, name, flags, offset)) ;
+	// On transforme la table des strings en section
+	taille = sizeof(strtab) / sizeof(char) ;
+	name = ;
+	flags = 
+	offset = tab_section.T[tab_section.nb - 1].header.sh_offset 
+		+ tab_section.T[tab_section.nb - 1].header.sh_size ; 
+	ajouter_tab_section(&tab_section, 
+			strtab_to_section(strtab, taille, name, flags, offset)) ;
 	// Ecriture des sections
 	for (i = 0 ; i < tab_section.nb ; i ++)
 	{
@@ -131,7 +150,7 @@ int main(int argc, char *argv[])
 	}
 	// Et de la table des section headers
 	offset = 
-	sections = 	
+	get_all_headers(tab_section, sections) ; 	
 	write_section_header(f3, sections, offset, header.e_shnum) ;
 	// Libere la memoire
 	fclose(f1) ;
