@@ -67,6 +67,16 @@ void afficher_sections(tab_section tab)
 	for (i = 0 ; i < tab.nb ; i ++) afficher_une_section(tab.T[i]); printf("\n") ;
 }
 
+void ecrire_section(FILE *f, section S)
+{
+	int i ;
+
+	for (i = 0 ; i < S.taille ; i ++)
+	{
+		fprintf(f, "%c", S.content[i]) ;
+	}
+}
+
 void concat(section* A, section B)
 {
 	int i ;

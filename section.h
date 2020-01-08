@@ -38,6 +38,8 @@ void afficher_une_section(section S) ;
 
 void afficher_sections(tab_section tab) ;
 
+void ecrire_section(FILE *f, section S) ;
+
 void concat(section* A, section B) ;
 
 section lire_section(FILE* f, Elf32_Shdr header) ;
