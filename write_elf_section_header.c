@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include "elf.h"
-#include "util.h"
+#include "elf_linker-1.0/util.h"
 
 #include "write_elf_section_header.h"
 #include "write_elf_head.h"
@@ -38,9 +38,6 @@ void write_section_header(FILE *f, Elf32_Shdr section_tab[],uint32_t offset,uint
         fwrite(&section_tab[i].sh_entsize,sizeof(Elf32_Word),1,f);   //Ecriture de l'entsize
 
         //Inversion selon l'endianness (ici on inverse)
-
-
-
     }
 
     return;

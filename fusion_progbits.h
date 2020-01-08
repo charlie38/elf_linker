@@ -1,12 +1,16 @@
 #ifndef FUSION_PROGBITS_H
 #define FUSION_PROGBITS_H
 
+#include <stdbool.h> 
 #include "section.h"
+
+#define NB_PROGBITS_MAX 50
+#define SIZE_NAME_MAX 50
 
 /** Pour memoriser les sections concatenees **/
 typedef struct
 {
-	char *name ;
+	char name[SIZE_NAME_MAX] ;
 	int size ;
 }
 concat_progbits ;
@@ -14,7 +18,7 @@ concat_progbits ;
 typedef struct 
 {
 	int nb ;
-	concat_progbits sections[] ;
+	concat_progbits sections[NB_PROGBITS_MAX] ;
 }
 memorize_concat_progbits ;
 
@@ -26,7 +30,7 @@ void fusion_progbits(FILE* A, FILE* B, tab_section* tab, Elf32_Shdr ShdrA[],
 bool is_progbits_concat(char *section_name) ;
 
 /** Retourne la taille de la section concatenee **/ 
-bool get_progbits_concat_size(char *section_name) ;
+int get_progbits_concat_size(char *section_name) ;
 
 void create_progbits_concat() ;
 

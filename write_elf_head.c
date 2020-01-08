@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #include "elf.h"
-#include "util.h"
+#include "elf_linker-1.0/util.h"
 #include "write_elf_head.h"
 
 void write_header(FILE *f, Elf32_Ehdr elf)

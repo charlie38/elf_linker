@@ -1,6 +1,7 @@
 #ifndef SECTION_H
 #define SECTION_H
-#define SIZE_MAX_ 50000
+#define SIZE_MAX_ 5000
+#define SIZE_MAX__ 100
 
 #include "elf.h"
 
@@ -17,7 +18,7 @@ section ;
 
 typedef struct
 {
-	section T[SIZE_MAX_] ;
+	section T[SIZE_MAX__] ;
 	int nb ;
 }
 tab_section ;

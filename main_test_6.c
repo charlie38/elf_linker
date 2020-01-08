@@ -51,9 +51,9 @@ int main(int argc, char *argv[])
 {
     // Declaration des variables
     FILE *f1, *f2, *f3 ;
-    Elf32_Ehdr header, header1, header2 ;
+    Elf32_Ehdr header1, header2 ;
     Elf32_Shdr sections1[SECTION_TAB_SIZE], sections2[SECTION_TAB_SIZE] ;
-    Elf32_Sym symtab[SYM_TAB_SIZE], symtab1[SYM_TAB_SIZE], symtab2[SYM_TAB_SIZE] ;
+    Elf32_Sym symtab1[SYM_TAB_SIZE], symtab2[SYM_TAB_SIZE] ;
 	char strtab[STR_TAB_SIZE], strtab1[STR_TAB_SIZE], strtab2[STR_TAB_SIZE] ;
 	tab_section tab_section ;
 	int i ;
@@ -98,30 +98,11 @@ int main(int argc, char *argv[])
 	// On fusionne les sections de type 'PROGBITS'
 	fusion_progbits(f1, f2, &tab_section, sections1, header1.e_shnum, 
 			sections2, header2.e_shnum, strtab) ;
-	// On fusionne les tables de symboles
-	fusion_symtab(symtab1, symtab2, index_symtab(sections1), index_symtab(sections2), 
-			strtab1, strtab2) ;
-	// On recupere la table des symboles fusionnee 
-	symtab = 
-	// Et celle des strings 
-	strtab = 
-	// On fusionne les tables de reimplantation 
-	fusion_rel(&tab_section, strtab, symtab, sections2[header2.e_shstrndx].sh_size,
-			f1, header1, sections1, strtab1, 
-			f2, header2, sections2, strtab2) ;
-	// On lit le header
-	header = 
-	// Ecriture du header
-	write_header(f3, header) ;
 	// Ecriture des sections
 	for (i = 0 ; i < tab_section.nb ; i ++)
 	{
 		ecrire_section(f3, tab_section.T[i]) ;
 	}
-	// Et de la table des section headers
-	offset = 
-	sections = 	
-	write_section_header(f3, sections, offset, header.e_shnum) ;
 	// Libere la memoire
 	fclose(f1) ;
 	fclose(f2) ;

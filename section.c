@@ -64,7 +64,12 @@ void afficher_une_section(section S)
 void afficher_sections(tab_section tab)
 {
 	int i ;
-	for (i = 0 ; i < tab.nb ; i ++) afficher_une_section(tab.T[i]); printf("\n") ;
+
+	for (i = 0 ; i < tab.nb ; i ++) 
+	{
+		afficher_une_section(tab.T[i]); 
+		printf("\n") ;
+	}
 }
 
 void ecrire_section(FILE *f, section S)

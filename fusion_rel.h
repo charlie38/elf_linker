@@ -7,13 +7,13 @@
 
 #include "section.h"
 
-#define SIZE_MAX_ 50000
+#define SIZE_MAX___ 50
 
 /** Structure pour memoriser les indices des sections deja lues dans le 2e fichier **/
 typedef struct 
 {
     int size ;
-    int elements[] ;
+    int elements[SIZE_MAX___] ;
 }
 memorize_read ;
 

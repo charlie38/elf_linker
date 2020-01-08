@@ -132,7 +132,7 @@ Elf32_Addr read_rel_offset(FILE *f, bool is_rela, char *section_name)
 	char progbits_name[len] ;
 	get_progbits_name(is_rela, len, section_name, progbits_name) ;
 	// Si la reimplementation appartient a une section progbit concatenee en fin de section 
-	if (is_f2(f) && is_progbits_concat(progbits_name)) ;
+	if (is_f2(f) && is_progbits_concat(progbits_name))
 	{
 		// On additionne la taille de la section concatene avant celle la
 		offset += get_progbits_concat_size(progbits_name) ;
@@ -290,7 +290,6 @@ bool is_f2(FILE *f)
 
 void get_progbits_name(bool is_rela, int len, char *section_name, char *progbits_name)
 {
-	int i ;
 	memcpy(progbits_name, &section_name[is_rela ? 5 : 4], len - (is_rela ? 4 : 3)) ;
 	progbits_name[len - (is_rela ? 3 : 2)] = '\0' ;
 }
