@@ -9,13 +9,14 @@
 #include "elf_linker-1.0/util.h"
 #include "util_bis.h"
 #include "fusion_rel.h"
+#include "fusion_progbits.h"
 #include "section.h"
 
 #define STRING_SIZE_MAX 10000
 
 FILE *F2 ;
 
-void fusion_rel(tab_section *tab, char strtab[], Elf32_Sym symtab[],
+void fusion_rel(tab_section *tab, char strtab[], Elf32_Sym symtab[], int symtab2_size,
             FILE *f1, Elf32_Ehdr header1, Elf32_Shdr sections1[], char strtab1[],
             FILE *f2, Elf32_Ehdr header2, Elf32_Shdr sections2[], char strtab2[])
 {
@@ -35,7 +36,7 @@ void fusion_rel(tab_section *tab, char strtab[], Elf32_Sym symtab[],
         if (section_type == SHT_REL || section_type == SHT_RELA) 
         {
             section = read_rel_section(section_type == SHT_RELA, f1, sections1[num_sec],
-					symtab, strtab1, strtab) ;
+					symtab, strtab1, strtab, symtab2_size) ;
             // On regarde si il en existe une de meme nom dans le deuxieme fichier     
             for (num_sec_bis = 0 ; num_sec_bis < header2.e_shnum ; num_sec_bis ++)
             {
@@ -43,8 +44,8 @@ void fusion_rel(tab_section *tab, char strtab[], Elf32_Sym symtab[],
                 // Si oui la lit
                 if (section_type_bis == SHT_REL || section_type_bis == SHT_RELA) 
                 {
-                    section_bis = read_rel_section(section_type_bis == SHT_RELA, f2, 
-							sections2[num_sec_bis], symtab, strtab2, strtab) ;          
+					section_bis = read_rel_section(section_type_bis == SHT_RELA, f2, 
+							sections2[num_sec_bis], symtab, strtab2, strtab, symtab2_size) ;          
                     // On la concatene
                     concat(&section, section_bis) ; 
                     // On memorise l'indice pour ne pas relire cette section
@@ -54,7 +55,7 @@ void fusion_rel(tab_section *tab, char strtab[], Elf32_Sym symtab[],
                 }
             }
             // On sauvegarde
-            insert_tab_section(tab, section) ;   
+            insert_tab_section(section_type == SHT_RELA, tab, section, strtab) ;   
         }
     }
     // On finit en parcourant toutes les sections de f2
@@ -66,16 +67,16 @@ void fusion_rel(tab_section *tab, char strtab[], Elf32_Sym symtab[],
             && ! is_in_memorize_read(memorize_read, num_sec)) 
         {
             section = read_rel_section(section_type == SHT_RELA, f2, sections2[num_sec],
-					symtab, strtab2, strtab) ;
+					symtab, strtab2, strtab, symtab2_size) ;
             // On sauvegarde
-            insert_tab_section(tab, section) ;   
+            insert_tab_section(section_type == SHT_RELA, tab, section, strtab) ;   
         }
     }
 }
 
 /** Lit la section 'rel' ou 'rela' dans f, definie par les parametres **/
 section read_rel_section(bool is_rela, FILE *f, Elf32_Shdr sectionHeader, 
-		Elf32_Sym symtab[], char old_strtab[], char new_strtab[])
+		Elf32_Sym symtab[], char old_strtab[], char new_strtab[], int symtab2_size)
 {
     int entry ;
     section section ;
@@ -88,7 +89,8 @@ section read_rel_section(bool is_rela, FILE *f, Elf32_Shdr sectionHeader,
          // On se positionne
         fseek(f, sectionHeader.sh_offset + entry, SEEK_SET) ;
         // On recupere le 'rel'
-        Elf32_Addr rel_offset = read_rel_offset(f) ;
+        Elf32_Addr rel_offset = read_rel_offset(f, is_rela, 
+				get_name(new_strtab, sectionHeader.sh_name)) ;
         Elf32_Word rel_info = read_rel_info(f, old_strtab, new_strtab) ;
         // Et on ecrit
 		sprintf(tmp, "%d", rel_offset) ;
@@ -102,7 +104,7 @@ section read_rel_section(bool is_rela, FILE *f, Elf32_Shdr sectionHeader,
 			// Que l'on modifie si c'est un type 'SECTION'
 			if (ELF32_ST_TYPE(symtab[ELF32_R_SYM(reverse_4(rel_info))].st_info) == STT_SECTION)
 			{
-				modif_rel_addend(f, &rel_addend, rel_info) ;
+				modif_rel_addend(f, &rel_addend, rel_info, symtab2_size) ;
 			}
 			// On ecrit
 			sprintf(tmp, "%d", rel_addend) ;
@@ -116,7 +118,7 @@ section read_rel_section(bool is_rela, FILE *f, Elf32_Shdr sectionHeader,
 
 /** Retourne l'offset 'du 'rel' a la position de courante de f,
     en effectuant des modifications **/
-Elf32_Addr read_rel_offset(FILE *f)
+Elf32_Addr read_rel_offset(FILE *f, bool is_rela, char *section_name)
 { 
     Elf32_Addr offset ;
     // On lit la variable
@@ -125,11 +127,15 @@ Elf32_Addr read_rel_offset(FILE *f)
     offset = reverse_4(offset) ;
     // On rechange le boutisme
     offset = reverse_4(offset) ;
+	// On recupere le potentiel nom de section progbits associee
+	int len = strlen(section_name) ;
+	char progbits_name[len] ;
+	get_progbits_name(is_rela, len, section_name, progbits_name) ;
 	// Si la reimplementation appartient a une section progbit concatenee en fin de section 
-	if (is_f2(f) && is_progbits_concat())
+	if (is_f2(f) && is_progbits_concat(progbits_name)) ;
 	{
 		// On additionne la taille de la section concatene avant celle la
-		offset += get_progbits_concat_size() ;
+		offset += get_progbits_concat_size(progbits_name) ;
 	}
 
     return offset ;
@@ -166,7 +172,7 @@ Elf32_Sword read_rel_addend(FILE *f)
     return addend ;
 }
 
-void modif_rel_addend(FILE *f, Elf32_Sword *addend, Elf32_Word rel_info)
+void modif_rel_addend(FILE *f, Elf32_Sword *addend, Elf32_Word rel_info, int symtab2_size)
 {
     // On change le boutisme
     *addend = reverse_4(*addend) ;
@@ -177,11 +183,11 @@ void modif_rel_addend(FILE *f, Elf32_Sword *addend, Elf32_Word rel_info)
 		switch (ELF32_R_TYPE(reverse_4(rel_info)))        
 		{
 			case R_ARM_ABS32 : 
-				*addend = *addend + get_symtab_concat_size() ;
+				*addend = *addend + symtab2_size ; 
 				break;
 			case R_ARM_CALL : 
 			case R_ARM_JUMP24 : 
-				*addend = *addend + get_symtab_concat_size() / 4 ;
+				*addend = *addend + symtab2_size / 4 ; 
 		}
 	}
     // On rechange le boutisme
@@ -191,11 +197,11 @@ void modif_rel_addend(FILE *f, Elf32_Sword *addend, Elf32_Word rel_info)
 /** Retourne le nouvel index associe au string donne **/
 Elf32_Word find_new_sym_index(int old_index, char old_strtab[], char new_strtab[])
 {
-    char sym[STRING_SIZE_MAX] ;
+    char *sym ;
     int i = 0, j, last_i ;
     int sym_size ;
     // On recupere le string
-    get_sym_from_index(sym, old_index, old_strtab) ;
+    sym = get_name(old_strtab, old_index) ;
     sym_size = strlen(sym) ;
     // Puis on cherche dans la nouvelle table jusqu'a retrouver le nouvel indice de depart
     while (true)
@@ -219,19 +225,6 @@ Elf32_Word find_new_sym_index(int old_index, char old_strtab[], char new_strtab[
     }
 
     return 0 ;
-}
-
-/** Cherche le string associe a l'index donne **/
-void get_sym_from_index(char *sym, int index, char strtab[])
-{
-    int i ;
-
-    for (i = index ; strtab[i] != '\0' ; i ++)
-    {
-        *(sym + i) = strtab[i] ;
-    }
-
-    *(sym + i) = '\0' ;
 }
 
 /** Struct **/
@@ -262,14 +255,16 @@ bool is_in_memorize_read(memorize_read m, int element)
     return false ;
 }
 
-void insert_tab_section(tab_section *tab, section section)
+void insert_tab_section(bool is_rela, tab_section *tab, section section, char *strtab)
 {
 	int i, j ;
 	// On parcourt toutes les sections
 	for (i = 0 ; i < tab->nb ; i ++)
 	{
 		// Pour trouver celle de type 'PROGBITS' associee
-		if (is_progbits_associated(tab->T[i], section))
+		if (is_progbits_associated(is_rela,
+					get_name(strtab, tab->T[i].header.sh_name), 
+					get_name(strtab, section.header.sh_name)))
 		{
 			// Puis on insere juste apres celle la notre section
 			inserer_tab_section(tab, section, i + 1) ;
@@ -291,4 +286,21 @@ void insert_tab_section(tab_section *tab, section section)
 bool is_f2(FILE *f)
 {
 	return f == F2 ;
+}
+
+void get_progbits_name(bool is_rela, int len, char *section_name, char *progbits_name)
+{
+	int i ;
+	memcpy(progbits_name, &section_name[is_rela ? 5 : 4], len - (is_rela ? 4 : 3)) ;
+	progbits_name[len - (is_rela ? 3 : 2)] = '\0' ;
+}
+
+bool is_progbits_associated(bool is_rela, char *progbits_name, char *section_name)
+{
+	int len = strlen(section_name) ;
+	char name[len] ;
+
+	get_progbits_name(is_rela, len, section_name, progbits_name) ;
+
+	return ! strcmp(progbits_name, name) ;
 }

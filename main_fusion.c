@@ -106,7 +106,8 @@ int main(int argc, char *argv[])
 	// Et celle des strings 
 	strtab = 
 	// On fusionne les tables de reimplantation 
-	fusion_rel(&tab_section, strtab, symtab, f1, header1, sections1, strtab1, 
+	fusion_rel(&tab_section, strtab, symtab, sections2[header2.e_shstrndx].sh_size,
+			f1, header1, sections1, strtab1, 
 			f2, header2, sections2, strtab2) ;
 	// On lit le header
 	header = 
@@ -119,7 +120,8 @@ int main(int argc, char *argv[])
 	}
 	// Et de la table des section headers
 	offset = 
-	write_elf_section_header(f3, sections, offset, header.e_shnum) ;
+	sections = 	
+	write_section_header(f3, sections, offset, header.e_shnum) ;
 	// Libere la memoire
 	fclose(f1) ;
 	fclose(f2) ;
