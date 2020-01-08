@@ -43,3 +43,13 @@ int strcat2(char *dest,char *src,int taille){
 	return t;
 	}
 }
+
+int search_name(char strtab[],char *name,int taille){
+	int res = -1;
+	int i = 0;
+	while(i < taille){
+		if(!strcmp(name,&strtab[i])) res = i;
+		i+=strlen(&strtab[i])+1;
+	}
+	return res;
+}
