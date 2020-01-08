@@ -3,7 +3,6 @@
 #include "elf.h"
 #include "elf_linker-1.0/util.h"
 
-
 Elf32_Ehdr read_header(FILE *f)
 {
 

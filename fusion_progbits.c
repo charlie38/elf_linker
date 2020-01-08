@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,9 +15,9 @@ memorize_concat_progbits memorize_progbits[MAX_PROGBITS] ;
 
 // Fusion et enregistrement
 void fusion_progbits(FILE* A, FILE* B, tab_section* tab, Elf32_Shdr ShdrA[], 
-		int nbsectA, Elf32_Shdr ShdrB[], int nbsectB, char strTab[])
+		int nbsectA, Elf32_Shdr ShdrB[], int nbsectB, char strTabA[],char strTabB[],Elf32_Sym symtabB[],int nbsymB)
 {
-	int i, j, cond, decalage;
+	int i, j,k, cond, decalage;
 	section a,b;
 	create_progbits_concat() ;
 	//cond=1 => ShdrA[i] deja ajoutee a tab
@@ -35,7 +36,7 @@ void fusion_progbits(FILE* A, FILE* B, tab_section* tab, Elf32_Shdr ShdrA[],
 			for(j=0; j<nbsectB; j++)
 			{
 				//Si les deux sections ont le meme nom
-				if( !strcmp(get_name(strTab, ShdrA[i].sh_name), get_name(strTab, ShdrB[i].sh_name)) )
+				if( !strcmp(get_name(strTabA, ShdrA[i].sh_name), get_name(strTabB, ShdrB[j].sh_name)) )
 				{
 					//Lecture et enregistrement des deux sections
 					a = lire_section(A, ShdrA[i]) ;
@@ -51,7 +52,11 @@ void fusion_progbits(FILE* A, FILE* B, tab_section* tab, Elf32_Shdr ShdrA[],
 					cond=1;
 					presents[j]=i;
 					// On memorise la concatenation
-					add_progbits_concat(get_name(strTab, ShdrB[i].sh_name), b.header.sh_size) ;
+					add_progbits_concat(get_name(strTabB, ShdrB[j].sh_name), b.header.sh_size) ;
+                        for(k=0;k<nbsymB;k++){
+                            if((symtabB[k].st_shndx == i-1))
+                            symtabB[k].st_shndx = i-1;
+                        }
 				}
 			}
 		}
@@ -73,15 +78,27 @@ void fusion_progbits(FILE* A, FILE* B, tab_section* tab, Elf32_Shdr ShdrA[],
 	{
 
 		//Si la section j de ShdrB n'est pas presente et est de type progbits
-		if(presents[j]==-1 && ShdrB[i].sh_type != SHT_SYMTAB 
-				&& ShdrB[i].sh_type != SHT_STRTAB && ShdrB[i].sh_type != SHT_REL 
-				&& ShdrB[i].sh_type != SHT_NULL)
+		if(presents[j]==-1 && ShdrB[j].sh_type != SHT_SYMTAB 
+				&& ShdrB[j].sh_type != SHT_STRTAB && ShdrB[j].sh_type != SHT_REL 
+				&& ShdrB[j].sh_type != SHT_NULL)
 		{
 			b = lire_section(B, ShdrB[j]) ;
 			tab->T[tab->nb]=b;
 			tab->nb++;
 		}
 	}
+
+    for(i=0;i<nbsectA;i++){
+        if(presents[i]!=-1){
+            for(j=0;j<nbsymB;j++){
+                //Si les deux sections ont le même nom et que le nom du symbole de B existe
+                if( !strcmp(get_name(strTabA, ShdrA[i].sh_name), get_name(strTabB, ShdrB[i].sh_name)) && symtabB[j].st_name != 0 ){
+                    symtabB[j].st_value = ShdrA[i].sh_size + symtabB[j].st_value;
+                }
+            }
+        }
+    }
+    
 }
 
 bool is_progbits_concat(char *section_name)

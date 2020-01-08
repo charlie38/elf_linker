@@ -3,9 +3,6 @@
 
 #include "elf.h"
 
-/*Fonction permettant de renvoyer le numéro de la section : table des strings */
-int index_strtab(Elf32_Shdr section_tab[]) ;
-
 /*Fonction permettant de renvoyer le numéro de la section : table des symboles*/
 int index_symtab(Elf32_Shdr section_tab[]);
 

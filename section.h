@@ -1,5 +1,5 @@
-#ifndef SECTION_H
-#define SECTION_H
+#ifndef __SECTION_H__
+#define __SECTION_H__
 #define SIZE_MAX_ 5000
 #define SIZE_MAX__ 100
 
@@ -50,15 +50,5 @@ void modifier_section_offset(section *S, int new_offset) ;
 void modifier_section_taille(section *S, int new_taille) ;
 
 void inserer_tab_section(tab_section *T, section S, int index) ;
-
-void lire_mot(section* S, int word) ;
-
-void lire_symbole(section* S, Elf32_Sym Sym) ;
-
-section symtab_to_section(Elf32_Sym symtab[], int nbsymb, int name, int flags,int offset) ;
-
-section strtab_to_section(char* strtab, int size, int name, int flags,int offset) ;
-
-void get_all_headers(tab_section T, Elf32_Shdr sections[]) ;
 
 #endif

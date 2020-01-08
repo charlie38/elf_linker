@@ -15,12 +15,8 @@ void espaces(int n){
 }
 
 int afficher_nom(char strtab[],int i){
-	int j = 0;
-	while(strtab[j] != '\0'){
-		j++;
-	}
 	printf("%s",&strtab[i]);
-	return j;
+	return strlen(&strtab[i]);
 }
 
 char *get_name(char strtab[],int i){

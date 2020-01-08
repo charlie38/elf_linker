@@ -1,5 +1,5 @@
-#ifndef FUSION_PROGBITS_H
-#define FUSION_PROGBITS_H
+#ifndef __FUSION_PROGBITS_H__
+#define __FUSION_PROGBITS_H__
 
 #include <stdbool.h> 
 #include "section.h"
@@ -24,7 +24,7 @@ memorize_concat_progbits ;
 
 /** Fusionne les sections progbits **/ 
 void fusion_progbits(FILE* A, FILE* B, tab_section* tab, Elf32_Shdr ShdrA[], 
-		int nbsectA, Elf32_Shdr ShdrB[], int nbsectB, char strTab[]) ;
+		int nbsectA, Elf32_Shdr ShdrB[], int nbsectB, char strTabA[],char strTabB[],Elf32_Sym symtabB[],int nbsymB) ;
 
 /** Retourne vrai si cette section a ete concatenee **/
 bool is_progbits_concat(char *section_name) ;

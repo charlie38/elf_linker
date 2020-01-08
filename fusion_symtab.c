@@ -39,7 +39,6 @@ int fusion_symtab(Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb_symbA,int nb_sy
 
     /*Traitement de tous les symboles du fichier A ( avec ceux en communs du B )*/
     for(i=0;i<nb_symbA;i++){
-        if(i>3)symtabB[i].st_value = 1;
         save_j = 0;
         switch(ELF32_ST_BIND(symtabA[i].st_info)){
 
@@ -56,7 +55,6 @@ int fusion_symtab(Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb_symbA,int nb_sy
                 strfu.taille = strcat2(strfu.strsymtab,get_name(strtabA,symtabA[i].st_name),strfu.taille);
                 if(symtabA[i].st_name != 0)
                 ind_strsymt+=strlen(get_name(strtabA,symtabA[i].st_name))+1;
-                printf("Valeur de l'indice : %d\n",ind_strsymt);
                 break;
 
             case STB_GLOBAL: //Si c'est GLOBAL , alors il faut vérifier les différents cas
@@ -89,7 +87,6 @@ int fusion_symtab(Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb_symbA,int nb_sy
                     strfu.taille = strcat2(strfu.strsymtab,get_name(strtabB,symtabB[save_j].st_name),strfu.taille);
                     if(symtabB[save_j].st_name != 0)
                     ind_strsymt+=strlen(get_name(strtabB,symtabB[save_j].st_name))+1;
-                    printf("Valeur de l'indice : %d\n",ind_strsymt);
                 }
                 else {
                     /*Ajout du symbole , correction de l'offset pour la valeur et ajout du nom dans la strsymtab*/
@@ -97,7 +94,6 @@ int fusion_symtab(Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb_symbA,int nb_sy
                     strfu.taille = strcat2(strfu.strsymtab,get_name(strtabA,symtabA[i].st_name),strfu.taille);
                     if(symtabA[i].st_name != 0)
                     ind_strsymt+=strlen(get_name(strtabA,symtabA[i].st_name))+1;
-                    printf("Valeur de l'indice : %d\n",ind_strsymt);
 
                 }
                 break;
@@ -114,7 +110,6 @@ int fusion_symtab(Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb_symbA,int nb_sy
                 strfu.taille = strcat2(strfu.strsymtab,get_name(strtabB,symtabB[i].st_name),strfu.taille);
                 symtab_fu[indice_sym].st_name = ind_strsymt;
                 ind_strsymt+=strlen(get_name(strtabB,symtabB[i].st_name))+1;
-                printf("Valeur de l'indice : %d\n",ind_strsymt);
             }
             else{
                 symtab_fu[indice_sym].st_name = i_name;
