@@ -6,13 +6,30 @@
 #include "elf.h"
 
 
-int index_symtab(Elf32_Shdr section_tab[]){
-    int i;
-    i=0;
-    while(section_tab[i].sh_type != SHT_SYMTAB){
-        i++;
+int index_strtab(Elf32_Shdr section_tab[])
+{
+    int i ;
+    i=0 ;
+
+    while(section_tab[i].sh_type != SHT_STRTAB)
+	{
+        i++ ;
     }
-    return i;
+
+    return i ;
+}
+
+int index_symtab(Elf32_Shdr section_tab[])
+{
+    int i ;
+    i = 0 ;
+
+    while(section_tab[i].sh_type != SHT_SYMTAB)
+	{
+        i++ ;
+    }
+
+    return i ;
 }
 
 void read_symtab(FILE *f, Elf32_Sym symtab[],Elf32_Shdr section_tab[],uint32_t offset,uint32_t nb_symb){
