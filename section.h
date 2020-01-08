@@ -40,7 +40,7 @@ void afficher_sections(tab_section tab) ;
 
 void concat(section* A, section B) ;
 
-section read_section(FILE* f, Elf32_Shdr header) ;
+section lire_section(FILE* f, Elf32_Shdr header) ;
 
 void modifier_section_offset(section *S, int new_offset) ;
 

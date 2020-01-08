@@ -79,7 +79,7 @@ void concat(section* A, section B)
 	A->taille += B.taille ;
 }
 
-section read_section(FILE* f, Elf32_Shdr header)
+section lire_section(FILE* f, Elf32_Shdr header)
 {
 	fseek(f, header.sh_offset, SEEK_SET) ;
 	int i ;
