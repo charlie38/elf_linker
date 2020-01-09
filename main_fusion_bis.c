@@ -56,15 +56,17 @@ int main(int argc, char *argv[])
     FILE *f1, *f2;
     Elf32_Ehdr header1, header2 ;
     Elf32_Shdr sections1[SECTION_TAB_SIZE], sections2[SECTION_TAB_SIZE] ;
-    Elf32_Sym symtab1[SYM_TAB_SIZE], symtab2[SYM_TAB_SIZE] ;
-	char hstrtab1[STR_TAB_SIZE],hstrtab2[STR_TAB_SIZE], strtab1[STR_TAB_SIZE], strtab2[STR_TAB_SIZE] ;
+    Elf32_Sym symtab[SYM_TAB_SIZE], symtab1[SYM_TAB_SIZE], symtab2[SYM_TAB_SIZE] ;
+	char strtab[STR_TAB_SIZE], shstrtab[STR_TAB_SIZE], 
+		 hstrtab1[STR_TAB_SIZE],hstrtab2[STR_TAB_SIZE], 
+		 strtab1[STR_TAB_SIZE], strtab2[STR_TAB_SIZE] ;
 	tab_section tab_section ;
     int nb_sym1, nb_sym2;
-	int i ;
+	int nb_shstr, nb_sym ;
     // Gestion erreurs nombre arguments
     if (argc < 3)
 	{
-        fprintf(stderr, "ERREUR : utilisation \"./prog nom_src1 nom_src2 nom_dest\"\n") ; 
+        fprintf(stderr, "ERREUR : utilisation \"./prog nom_src1 nom_src2\"\n") ; 
         return ERROR_NB_FILES ;
     }
     // Ouverture fichiers
@@ -96,8 +98,11 @@ int main(int argc, char *argv[])
     get_strtab(f1, header1, sections1, hstrtab1) ;
 	get_strtab(f2, header2, sections2, hstrtab2) ;
 	// On fusionne les sections de type 'PROGBITS'
-	fusion_progbits(f1, f2, &tab_section, sections1, header1.e_shnum, sections2, header2.e_shnum, hstrtab1,hstrtab2,symtab2,nb_sym2) ;
-    fusion_symtab(symtab1,symtab2,nb_sym1,nb_sym2,strtab1,strtab2);
+	fusion_progbits(&nb_shstr, shstrtab, f1, f2, &tab_section, 
+			sections1, header1.e_shnum, sections2, header2.e_shnum, 
+			strtab1, strtab2,
+			hstrtab1,hstrtab2,symtab2,nb_sym2) ;
+    fusion_symtab(strtab, &nb_sym, symtab, symtab1,symtab2,nb_sym1,nb_sym2,strtab1,strtab2);
 
 	// Libere la memoire
 	fclose(f1) ;
