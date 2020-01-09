@@ -5,14 +5,28 @@
 #include "elf_linker-1.0/util.h"
 #include "elf.h"
 
+int index_strtab(Elf32_Shdr section_tab[])
+{
+    int i = 0;
 
-int index_symtab(Elf32_Shdr section_tab[]){
-    int i;
-    i=0;
-    while(section_tab[i].sh_type != SHT_SYMTAB){
+    while (section_tab[i].sh_type != SHT_SYMTAB)
+	{
         i++;
+	}
+
+	return i ;
+}
+
+int index_symtab(Elf32_Shdr section_tab[])
+{
+    int i = 0 ;
+
+    while (section_tab[i].sh_type != SHT_SYMTAB) 
+	{
+        i ++ ;
     }
-    return i;
+
+    return i ;
 }
 
 void read_symtab(FILE *f, Elf32_Sym symtab[],Elf32_Shdr section_tab[],uint32_t offset,uint32_t nb_symb){

@@ -14,8 +14,9 @@
 memorize_concat_progbits memorize_progbits[MAX_PROGBITS] ;
 
 // Fusion et enregistrement
-void fusion_progbits(FILE* A, FILE* B, tab_section* tab, Elf32_Shdr ShdrA[], 
-		int nbsectA, Elf32_Shdr ShdrB[], int nbsectB, char strTabA[],char strTabB[],Elf32_Sym symtabB[],int nbsymB)
+void fusion_progbits(int *nb_shstr, char *shstrtab, FILE* A, FILE* B, tab_section* tab, Elf32_Shdr ShdrA[], 
+		int nbsectA, Elf32_Shdr ShdrB[], int nbsectB, char strTabA[],char strTabB[],
+		char shstrtabA[], char shstrtabB[], Elf32_Sym symtabB[],int nbsymB)
 {
 	int i, j,k, cond, decalage;
 	section a,b;
@@ -24,11 +25,17 @@ void fusion_progbits(FILE* A, FILE* B, tab_section* tab, Elf32_Shdr ShdrA[],
 	cond=0;
 	decalage = 0 ;
 	int presents[nbsectB]; // ( presents[i]!=-1 => ShdrB[i] a ete concatenee a la section ShdrA[presents[i]] )
+	int shstrtab_size = 0 ;
+	*nb_shstr = 0 ;
 	//Initialisation de presents
 	for(j=0;j<nbsectB;j++) presents[j]=-1;
 	//Parcours toutes les sections du fichier A
 	for(i=0;i<nbsectA;i++)
 	{
+		// On ajoute au shstrtab
+		strcat2(shstrtab, get_name(shstrtabA, ShdrA[i].sh_name), shstrtab_size) ;
+		shstrtab_size += strlen(get_name(shstrtabA, ShdrA[i].sh_name)) + 1 ;
+		*nb_shstr = *nb_shstr + 1 ;
 		//Si section est de type PROGBITS
 		if (ShdrA[i].sh_type==SHT_PROGBITS)
 		{
@@ -67,8 +74,7 @@ void fusion_progbits(FILE* A, FILE* B, tab_section* tab, Elf32_Shdr ShdrA[],
 		{
 			a = lire_section(A, ShdrA[i]) ;
 			a.header.sh_offset += decalage ;
-			tab->T[tab->nb]=a;
-			tab->nb++;
+			ajouter_tab_section(tab, a) ;
 		}
 
 	}
@@ -83,8 +89,11 @@ void fusion_progbits(FILE* A, FILE* B, tab_section* tab, Elf32_Shdr ShdrA[],
 				&& ShdrB[j].sh_type != SHT_NULL)
 		{
 			b = lire_section(B, ShdrB[j]) ;
-			tab->T[tab->nb]=b;
-			tab->nb++;
+			ajouter_tab_section(tab, b) ;
+			// On ajoute au shstrtab
+			strcat2(shstrtab, get_name(shstrtabB, ShdrB[i].sh_name), strlen(shstrtab)) ;
+			shstrtab_size += strlen(get_name(shstrtabB, ShdrB[i].sh_name)) + 1 ;
+			*nb_shstr = *nb_shstr + 1 ;
 		}
 	}
 
@@ -92,13 +101,13 @@ void fusion_progbits(FILE* A, FILE* B, tab_section* tab, Elf32_Shdr ShdrA[],
         if(presents[i]!=-1){
             for(j=0;j<nbsymB;j++){
                 //Si les deux sections ont le même nom et que le nom du symbole de B existe
-                if( !strcmp(get_name(strTabA, ShdrA[i].sh_name), get_name(strTabB, ShdrB[i].sh_name)) && symtabB[j].st_name != 0 ){
+                if( !strcmp(get_name(strTabA, ShdrA[i].sh_name), get_name(strTabB, ShdrB[i].sh_name)) 
+						&& symtabB[j].st_name != 0 ){
                     symtabB[j].st_value = ShdrA[i].sh_size + symtabB[j].st_value;
                 }
             }
         }
     }
-    
 }
 
 bool is_progbits_concat(char *section_name)

@@ -116,7 +116,6 @@ void afficher_sht(Elf32_Shdr section_tab[], int taille, char strtab[]){
 		printf("%d", section_tab[i].sh_addralign);
     
 		printf("\n");
-
 	}
 	
 	

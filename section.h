@@ -51,4 +51,10 @@ void modifier_section_taille(section *S, int new_taille) ;
 
 void inserer_tab_section(tab_section *T, section S, int index) ;
 
+void get_all_headers(tab_section T, Elf32_Shdr sections[]) ;
+
+section symtab_to_section(Elf32_Sym symtab[], int nbsymb, int name, int flags, int offset) ;
+
+section strtab_to_section(char* strtab, int size, int name, int flags, int offset) ;
+
 #endif

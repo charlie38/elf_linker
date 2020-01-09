@@ -6,6 +6,10 @@
 
 #include "elf_linker-1.0/util.h"
 #include "util_bis.h"
+#include "print_elf_sect.h"
+#include "print_elf_head.h"
+#include "print_elf_symt.h"
+#include "print_elf_rel.h"
 #include "read_elf_sect.h"
 #include "read_elf_head.h"
 #include "read_elf_symt.h"
@@ -42,9 +46,14 @@ void get_symtab(FILE *f, Elf32_Shdr sections[], int index, Elf32_Sym *symtab)
 			sections[index].sh_size / sizeof(Elf32_Sym)) ;
 }
 
-void get_strtab(FILE *f, Elf32_Ehdr header, Elf32_Shdr sections[], char *strtab)
+void get_shstrtab(FILE *f, Elf32_Ehdr header, Elf32_Shdr sections[], char *strtab)
 {
     read_string_table(f, header, sections, strtab, header.e_shstrndx) ;
+}
+
+void get_strtab(FILE *f, Elf32_Ehdr header, Elf32_Shdr sections[], char *strtab)
+{
+    read_string_table(f, header, sections, strtab, header.e_shstrndx + 2) ;
 }
 
 void create_new_header(Elf32_Ehdr *header, Elf32_Ehdr header1, Elf32_Ehdr header2,
@@ -53,8 +62,8 @@ void create_new_header(Elf32_Ehdr *header, Elf32_Ehdr header1, Elf32_Ehdr header
 	header->e_shoff = tab_section.T[tab_section.nb - 1].header.sh_offset 
 		+ tab_section.T[tab_section.nb - 1].header.sh_size + 1 ;
     header->e_flags = header1.e_flags || header2.e_flags;
-    header->e_shnum = tab_section.nb ;
-    header->e_shstrndx = SHN_UNDEF ;
+    header->e_shnum = tab_section.nb + 4 ;
+    header->e_shstrndx = tab_section.nb ;
 }
 
 int main(int argc, char *argv[])
@@ -65,9 +74,10 @@ int main(int argc, char *argv[])
     Elf32_Shdr sections[SECTION_TAB_SIZE], sections1[SECTION_TAB_SIZE], 
 			   sections2[SECTION_TAB_SIZE] ;
     Elf32_Sym symtab[SYM_TAB_SIZE], symtab1[SYM_TAB_SIZE], symtab2[SYM_TAB_SIZE] ;
-	char strtab[STR_TAB_SIZE], strtab1[STR_TAB_SIZE], strtab2[STR_TAB_SIZE] ;
+	char strtab[STR_TAB_SIZE], strtab1[STR_TAB_SIZE], strtab2[STR_TAB_SIZE],
+			shstrtab[STR_TAB_SIZE], shstrtab1[STR_TAB_SIZE], shstrtab2[STR_TAB_SIZE] ;
 	tab_section tab_section ;
-	int i, taille, name, flags, offset ;
+	int i, taille, name, flags, offset, nb_shstr, nb_sym ;
     // Gestion erreurs nombre arguments
     if (argc < 4)
 	{
@@ -106,28 +116,32 @@ int main(int argc, char *argv[])
 	get_symtab(f2, sections2, index_symtab(sections2), symtab2) ;
 	get_strtab(f1, header1, sections1, strtab1) ;
 	get_strtab(f2, header2, sections2, strtab2) ;
+	get_shstrtab(f1, header1, sections1, shstrtab1) ;
+	get_shstrtab(f2, header2, sections2, shstrtab2) ;
 	// On fusionne les sections de type 'PROGBITS'
-	fusion_progbits(f1, f2, &tab_section, sections1, header1.e_shnum, 
-			sections2, header2.e_shnum, strtab) ;
+	fusion_progbits(&nb_shstr, shstrtab, f1, f2, &tab_section, sections1, header1.e_shnum, 
+			sections2, header2.e_shnum, strtab1, strtab2, shstrtab1, shstrtab2, symtab2,  
+			sizeof(sections2) / sizeof(Elf32_Sym)) ;
 	// On fusionne les tables de symboles
-	fusion_symtab(symtab1, symtab2, index_symtab(sections1), index_symtab(sections2), 
-			strtab1, strtab2) ;
-	// On recupere la table des symboles fusionnee 
-	symtab = 
-	// Et celle des strings 
-	strtab = 
+	fusion_symtab(strtab, &nb_sym, symtab, symtab1, symtab2, index_symtab(sections1), 
+			index_symtab(sections2), strtab1, strtab2) ;
 	// On fusionne les tables de reimplantation 
-	fusion_rel(&tab_section, strtab, symtab, sections2[header2.e_shstrndx].sh_size,
-			f1, header1, sections1, strtab1, 
+	fusion_rel(&tab_section, strtab, symtab, nb_sym, f1, header1, sections1, strtab1, 
 			f2, header2, sections2, strtab2) ;
 	// On creer le nouveau header
 	header = header1 ;
 	create_new_header(&header, header1, header2, tab_section) ;
-	// Ecriture du header
-	write_header(f3, header) ;
+	// On transforme la table des sh-strings en section
+	taille = nb_shstr ; 
+	name = tab_section.nb ;
+	flags = sections1[index_strtab(sections1)].sh_flags
+		+ sections2[index_strtab(sections2)].sh_flags ; 
+	offset = tab_section.T[tab_section.nb - 1].header.sh_offset 
+		+ tab_section.T[tab_section.nb - 1].header.sh_size ; 
+	ajouter_tab_section(&tab_section, 
+			strtab_to_section(shstrtab, taille, name, flags, offset)) ;
 	// On transforme la table de symboles en section
-	taille = sections1[index_symtab(sections1)].sh_size / sizeof(Elf32_Sym)
-		+ sections2[index_symtab(sections2)].sh_size / sizeof(Elf32_Sym) ;
+	taille = nb_sym ; 
 	name = tab_section.nb ;
 	flags = sections1[index_symtab(sections1)].sh_flags 
 		+ sections2[index_symtab(sections2)].sh_flags ; 
@@ -138,12 +152,18 @@ int main(int argc, char *argv[])
 	// On transforme la table des strings en section
 	taille = sizeof(strtab) / sizeof(char) ;
 	name = tab_section.nb ;
-	flags = sections1[index_strtab(sections1)].sh_flags
-		+ sections2[index_strtab(sections2)].sh_flags ; 
+	flags = sections1[index_strtab(sections1) + 2].sh_flags
+		+ sections2[index_strtab(sections2) + 2].sh_flags ; 
 	offset = tab_section.T[tab_section.nb - 1].header.sh_offset 
 		+ tab_section.T[tab_section.nb - 1].header.sh_size ; 
 	ajouter_tab_section(&tab_section, 
 			strtab_to_section(strtab, taille, name, flags, offset)) ;
+	// Modification du header
+	header.e_shoff = tab_section.T[tab_section.nb - 1].header.sh_offset 
+		+ tab_section.T[tab_section.nb - 1].header.sh_size ;
+	header.e_shnum = tab_section.nb ;
+	// Ecriture du header
+	write_header(f3, header) ;
 	// Ecriture des sections
 	for (i = 0 ; i < tab_section.nb ; i ++)
 	{
@@ -158,6 +178,10 @@ int main(int argc, char *argv[])
 	fclose(f1) ;
 	fclose(f2) ;
 	fclose(f3) ;
+	// On affiche les informations
+	print_elf_head(header) ;
+	printf("\n") ;
+	afficher_symb_tab(symtab, nb_sym, strtab)	;
 
     return 0 ;
 }

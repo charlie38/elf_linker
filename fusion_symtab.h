@@ -11,6 +11,7 @@ typedef struct{
 }  StrsymFu ;
 
 /*Fonction permettant la fusion de la table des symboles et de la strtab ( noms des symboles )*/
-int fusion_symtab(Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb_symbA,int nb_symbB,char strtabA[],char strtabB[]);
+int fusion_symtab(char *strtab, int *nb_symb, Elf32_Sym symtab[], Elf32_Sym symtabA[], 
+		Elf32_Sym symtabB[],int nb_symbA,int nb_symbB,char strtabA[],char strtabB[]) ;
 
 #endif

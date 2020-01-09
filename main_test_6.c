@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 	char hstrtab1[STR_TAB_SIZE],hstrtab2[STR_TAB_SIZE], strtab1[STR_TAB_SIZE], strtab2[STR_TAB_SIZE] ;
 	tab_section tab_section ;
     int nb_sym1, nb_sym2;
-	//int i ;
+	int i ;
     // Gestion erreurs nombre arguments
     if (argc < 3)
 	{

@@ -204,17 +204,12 @@ Elf32_Word find_new_sym_index(int old_index, char old_strtab[], char new_strtab[
     sym = get_name(old_strtab, old_index) ;
     sym_size = strlen(sym) ;
     // Puis on cherche dans la nouvelle table jusqu'a retrouver le nouvel indice de depart
-    while (true)
+    while (i < strlen(new_strtab))
     {
         last_i = i ;
 
-        for (j = 0 ; j < sym_size ; j ++)
+        for (j = 0 ; j < sym_size && sym[j] == new_strtab[i] ; j ++)
         {
-            if (sym[j] != new_strtab[i])
-            {
-                break ;
-            }
-
             if (j == sym_size - 1)
             {
                 return last_i ;
@@ -222,6 +217,8 @@ Elf32_Word find_new_sym_index(int old_index, char old_strtab[], char new_strtab[
 
             i ++ ;
         }
+
+		i = last_i + 1 ;
     }
 
     return 0 ;
@@ -290,8 +287,12 @@ bool is_f2(FILE *f)
 
 void get_progbits_name(bool is_rela, int len, char *section_name, char *progbits_name)
 {
-	memcpy(progbits_name, &section_name[is_rela ? 5 : 4], len - (is_rela ? 4 : 3)) ;
-	progbits_name[len - (is_rela ? 3 : 2)] = '\0' ;
+	int i ;
+
+	for (i = 0 ; i <= len ; i ++)
+	{
+		progbits_name[i] = section_name[i + 4 + ((is_rela) ? 1 : 0)] ;
+	}
 }
 
 bool is_progbits_associated(bool is_rela, char *progbits_name, char *section_name)

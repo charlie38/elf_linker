@@ -19,8 +19,9 @@ int comparer_symbole(Elf32_Sym symA,Elf32_Sym symB){
     return res;
 }
 
-int fusion_symtab(Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb_symbA,int nb_symbB,char strtabA[],char strtabB[]){
-
+int fusion_symtab(char *strtab, int *nb_sym, Elf32_Sym symtab[], Elf32_Sym symtabA[],
+		Elf32_Sym symtabB[], int nb_symbA, int nb_symbB, char strtabA[], char strtabB[])
+{
     /*Déclaration des variables - tableaux*/
     int i;
     int j;
@@ -28,7 +29,6 @@ int fusion_symtab(Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb_symbA,int nb_sy
     int indice_sym = 0;
     int i_name;
 
-    Elf32_Sym symtab_fu[maxi(nb_symbA,nb_symbB)*2];  //symtab_fu est la symtab finale , après fusion
     StrsymFu strfu; //strsymtab est  la table pour les noms des symboles après fusion 
     strfu.taille = 1;
     strfu.strsymtab[0] = '\0'; 
@@ -51,7 +51,7 @@ int fusion_symtab(Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb_symbA,int nb_sy
                     }
                 }
                 /*Ajout du symbole , correction de l'offset pour la valeur et ajout du nom dans la strsymtab*/
-                symtab_fu[indice_sym] = symtabA[i];
+                symtab[indice_sym] = symtabA[i];
                 strfu.taille = strcat2(strfu.strsymtab,get_name(strtabA,symtabA[i].st_name),strfu.taille);
                 if(symtabA[i].st_name != 0)
                 ind_strsymt+=strlen(get_name(strtabA,symtabA[i].st_name))+1;
@@ -83,14 +83,14 @@ int fusion_symtab(Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb_symbA,int nb_sy
                 }
                 if(save_j != 0){
                     /*Ajout du symbole , correction de l'offset pour la valeur et ajout du nom dans la strsymtab*/
-                    symtab_fu[indice_sym] = symtabB[save_j];
+                    symtab[indice_sym] = symtabB[save_j];
                     strfu.taille = strcat2(strfu.strsymtab,get_name(strtabB,symtabB[save_j].st_name),strfu.taille);
                     if(symtabB[save_j].st_name != 0)
                     ind_strsymt+=strlen(get_name(strtabB,symtabB[save_j].st_name))+1;
                 }
                 else {
                     /*Ajout du symbole , correction de l'offset pour la valeur et ajout du nom dans la strsymtab*/
-                    symtab_fu[indice_sym] = symtabA[i];
+                    symtab[indice_sym] = symtabA[i];
                     strfu.taille = strcat2(strfu.strsymtab,get_name(strtabA,symtabA[i].st_name),strfu.taille);
                     if(symtabA[i].st_name != 0)
                     ind_strsymt+=strlen(get_name(strtabA,symtabA[i].st_name))+1;
@@ -104,19 +104,23 @@ int fusion_symtab(Elf32_Sym symtabA[],Elf32_Sym symtabB[],int nb_symbA,int nb_sy
     /*Traitement de tous les symboles du fichier B pas encore traites*/
     for(i=0;i<nb_symbB;i++){
         if(traite[i] != 1){
-            symtab_fu[indice_sym] = symtabB[i];
+            symtab[indice_sym] = symtabB[i];
             i_name = search_name(strfu.strsymtab,get_name(strtabB,symtabB[i].st_name),strfu.taille);
             if(i_name == -1){
                 strfu.taille = strcat2(strfu.strsymtab,get_name(strtabB,symtabB[i].st_name),strfu.taille);
-                symtab_fu[indice_sym].st_name = ind_strsymt;
+                symtab[indice_sym].st_name = ind_strsymt;
                 ind_strsymt+=strlen(get_name(strtabB,symtabB[i].st_name))+1;
             }
             else{
-                symtab_fu[indice_sym].st_name = i_name;
+                symtab[indice_sym].st_name = i_name;
             }
             indice_sym+=1;
         }
     }
-    afficher_symb_tab(symtab_fu,indice_sym,strfu.strsymtab);
+
+	*nb_sym = indice_sym ;
+	/* Pour recuperer dans le main */	
+	strcpy(strtab, strfu.strsymtab) ;
+
     return indice_sym;
 }
