@@ -121,6 +121,6 @@ int fusion_symtab(char *strtab, int *nb_sym, Elf32_Sym symtab[], Elf32_Sym symta
 	*nb_sym = indice_sym ;
 	/* Pour recuperer dans le main */	
 	strcpy(strtab, strfu.strsymtab) ;
-
+    afficher_symb_tab(symtab,indice_sym,strfu.strsymtab);
     return indice_sym;
 }
