@@ -34,8 +34,10 @@ bool is_progbits_concat(char *section_name) ;
 /** Retourne la taille de la section concatenee **/ 
 int get_progbits_concat_size(char *section_name) ;
 
+/** Permet la concaténation de deux sections progbits **/
 void create_progbits_concat() ;
 
+/**Permet d'ajouter la concaténation a la table des sections finales**/
 void add_progbits_concat(char *name, int size) ;
 
 #endif
