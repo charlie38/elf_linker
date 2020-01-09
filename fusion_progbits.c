@@ -47,7 +47,7 @@ void fusion_progbits(int *nb_shstr, char *shstrtab, FILE* A, FILE* B, tab_sectio
 				{
 					//Lecture et enregistrement des deux sections
 					a = lire_section(A, ShdrA[i]) ;
-					b = lire_section(B, ShdrB[i]) ;
+					b = lire_section(B, ShdrB[j]) ;
 					//Concatenation des deux sections
 					concat(&a,b);
 					a.header.sh_offset+=decalage;
@@ -91,8 +91,8 @@ void fusion_progbits(int *nb_shstr, char *shstrtab, FILE* A, FILE* B, tab_sectio
 			b = lire_section(B, ShdrB[j]) ;
 			ajouter_tab_section(tab, b) ;
 			// On ajoute au shstrtab
-			strcat2(shstrtab, get_name(shstrtabB, ShdrB[i].sh_name), strlen(shstrtab)) ;
-			shstrtab_size += strlen(get_name(shstrtabB, ShdrB[i].sh_name)) + 1 ;
+			strcat2(shstrtab, get_name(shstrtabB, ShdrB[j].sh_name), strlen(shstrtab)) ;
+			shstrtab_size += strlen(get_name(shstrtabB, ShdrB[j].sh_name)) + 1 ;
 			*nb_shstr = *nb_shstr + 1 ;
 		}
 	}
@@ -101,7 +101,7 @@ void fusion_progbits(int *nb_shstr, char *shstrtab, FILE* A, FILE* B, tab_sectio
         if(presents[i]!=-1){
             for(j=0;j<nbsymB;j++){
                 //Si les deux sections ont le même nom et que le nom du symbole de B existe
-                if( !strcmp(get_name(strTabA, ShdrA[i].sh_name), get_name(strTabB, ShdrB[i].sh_name)) 
+                if( !strcmp(get_name(strTabA, ShdrA[i].sh_name), get_name(strTabB, ShdrB[j].sh_name)) 
 						&& symtabB[j].st_name != 0 ){
                     symtabB[j].st_value = ShdrA[i].sh_size + symtabB[j].st_value;
                 }
