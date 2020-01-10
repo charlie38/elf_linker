@@ -101,7 +101,7 @@ void fusion_progbits(int *nb_shstr, char *shstrtab, FILE* A, FILE* B, tab_sectio
         if(presents[i]!=-1){
             for(j=0;j<nbsymB;j++){
                 //Si les deux sections ont le même nom et que le nom du symbole de B existe
-                if( !strcmp(get_name(strTabA, ShdrA[i].sh_name), get_name(strTabB, ShdrB[j].sh_name)) 
+                if( !strcmp(get_name(strTabA, ShdrA[i].sh_name), get_name(strTabB,  ShdrA[symtabB[j].st_shndx].sh_name)) 
 						&& symtabB[j].st_name != 0 ){
                     symtabB[j].st_value = ShdrA[i].sh_size + symtabB[j].st_value;
                 }
